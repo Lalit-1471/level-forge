@@ -39,8 +39,11 @@ public class ProgressionRepository {
         return expEventDao.observeRecentEvents(limit);
     }
 
-    public void initializeLevelState() {
+    public void initializeLevelStateIfNeeded() {
         diskExecutor.execute(() -> {
+            if (levelStateDao.getLevelState() != null) {
+                return;
+            }
             RankTier rankTier = RankEvaluator.rankForLevel(1);
             LevelState state = new LevelState(1, 0, rankTier, TitleCatalog.titleFor(1, rankTier), System.currentTimeMillis());
             levelStateDao.upsert(state);

@@ -7,7 +7,23 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.lalit.levelforge.ui.home.HomeFragment"
-        android:label="@string/dashboard_title" />
+        android:label="@string/dashboard_title">
+        <action
+            android:id="@+id/action_homeFragment_to_onboardingFragment"
+            app:destination="@id/onboardingFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_exerciseLibraryFragment"
+            app:destination="@id/exerciseLibraryFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/onboardingFragment"
+        android:name="com.lalit.levelforge.ui.onboarding.OnboardingFragment"
+        android:label="@string/onboarding_title" />
+
+    <fragment
+        android:id="@+id/exerciseLibraryFragment"
+        android:name="com.lalit.levelforge.ui.exercise.ExerciseLibraryFragment"
+        android:label="@string/exercise_library_title" />
 
 </navigation>
-

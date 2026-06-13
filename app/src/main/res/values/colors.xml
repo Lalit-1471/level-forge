@@ -2,8 +2,11 @@
 <resources>
     <color name="slate_950">#0B1220</color>
     <color name="slate_900">#111827</color>
+    <color name="slate_800">#1F2937</color>
+    <color name="slate_700">#334155</color>
     <color name="slate_300">#CBD5E1</color>
     <color name="slate_200">#E2E8F0</color>
     <color name="orange_400">#FB923C</color>
+    <color name="teal_300">#5EEAD4</color>
+    <color name="emerald_400">#34D399</color>
 </resources>
-

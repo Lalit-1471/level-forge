@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/slate_950">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/onboarding_title"
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/onboarding_subtitle"
+            android:textColor="@color/slate_200"
+            android:textSize="16sp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="@color/slate_900"
+            app:cardCornerRadius="8dp"
+            app:strokeColor="@color/slate_700"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_body_label"
+                    android:textColor="@color/teal_300"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/onboarding_gender"
+                    android:textColor="@color/slate_300" />
+
+                <Spinner
+                    android:id="@+id/genderSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+
+                <EditText
+                    android:id="@+id/ageInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_age"
+                    android:inputType="number"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <EditText
+                    android:id="@+id/heightInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_height"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <EditText
+                    android:id="@+id/weightInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_weight"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="@color/slate_900"
+            app:cardCornerRadius="8dp"
+            app:strokeColor="@color/slate_700"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_goal_label"
+                    android:textColor="@color/teal_300"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/onboarding_goal"
+                    android:textColor="@color/slate_300" />
+
+                <Spinner
+                    android:id="@+id/goalSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+
+                <EditText
+                    android:id="@+id/targetWeightInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_target_weight"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/onboarding_activity"
+                    android:textColor="@color/slate_300" />
+
+                <Spinner
+                    android:id="@+id/activitySpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="@color/slate_900"
+            app:cardCornerRadius="8dp"
+            app:strokeColor="@color/slate_700"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_health_label"
+                    android:textColor="@color/teal_300"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/jointPainCheckBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Joint pain"
+                    android:textColor="@color/slate_200" />
+
+                <CheckBox
+                    android:id="@+id/backPainCheckBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Back pain"
+                    android:textColor="@color/slate_200" />
+
+                <CheckBox
+                    android:id="@+id/heartConditionCheckBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Heart condition"
+                    android:textColor="@color/slate_200" />
+
+                <CheckBox
+                    android:id="@+id/diabetesCheckBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Diabetes"
+                    android:textColor="@color/slate_200" />
+
+                <CheckBox
+                    android:id="@+id/injuryCheckBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Current injury"
+                    android:textColor="@color/slate_200" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="@color/slate_900"
+            app:cardCornerRadius="8dp"
+            app:strokeColor="@color/slate_700"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_strength_label"
+                    android:textColor="@color/teal_300"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/maxPushupsInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_pushups"
+                    android:inputType="number"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <EditText
+                    android:id="@+id/maxPullupsInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_pullups"
+                    android:inputType="number"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <EditText
+                    android:id="@+id/maxSquatsInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_squats"
+                    android:inputType="number"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <EditText
+                    android:id="@+id/squatKgInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_squat_kg"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <EditText
+                    android:id="@+id/benchKgInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_bench_kg"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <EditText
+                    android:id="@+id/deadliftKgInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_deadlift_kg"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+
+                <EditText
+                    android:id="@+id/overheadPressKgInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/onboarding_press_kg"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/calculateButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="18dp"
+            android:text="@string/onboarding_calculate"
+            android:textAllCaps="false"
+            app:cornerRadius="8dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/recommendationCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/slate_900"
+            app:cardCornerRadius="8dp"
+            app:strokeColor="@color/orange_400"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/onboarding_recommendation_label"
+                    android:textColor="@color/orange_400"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/caloriesValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/macrosValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/slate_200"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/hydrationValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/slate_200"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/workoutDurationValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="@color/slate_200"
+                    android:textSize="15sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/startButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/onboarding_start"
+                    android:textAllCaps="false"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</ScrollView>

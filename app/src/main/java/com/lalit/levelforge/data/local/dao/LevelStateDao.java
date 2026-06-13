@@ -13,6 +13,9 @@ public interface LevelStateDao {
     @Query("SELECT * FROM level_state WHERE id = 1")
     LiveData<LevelState> observeLevelState();
 
+    @Query("SELECT * FROM level_state WHERE id = 1")
+    LevelState getLevelState();
+
     @Upsert
     void upsert(LevelState levelState);
 }
