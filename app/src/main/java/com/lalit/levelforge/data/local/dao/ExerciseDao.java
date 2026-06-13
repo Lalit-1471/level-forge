@@ -21,6 +21,9 @@ public interface ExerciseDao {
     @Query("SELECT * FROM exercises WHERE primaryMuscleGroup = :muscleGroup ORDER BY name")
     LiveData<List<Exercise>> observeByPrimaryMuscle(MuscleGroup muscleGroup);
 
+    @Query("SELECT COUNT(*) FROM exercises")
+    int countExercises();
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertDefaults(List<Exercise> exercises);
 

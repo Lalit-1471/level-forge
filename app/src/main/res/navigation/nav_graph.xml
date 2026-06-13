@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_homeFragment_to_exerciseLibraryFragment"
             app:destination="@id/exerciseLibraryFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_workoutLoggerFragment"
+            app:destination="@id/workoutLoggerFragment" />
     </fragment>
 
     <fragment
@@ -25,5 +28,10 @@
         android:id="@+id/exerciseLibraryFragment"
         android:name="com.lalit.levelforge.ui.exercise.ExerciseLibraryFragment"
         android:label="@string/exercise_library_title" />
+
+    <fragment
+        android:id="@+id/workoutLoggerFragment"
+        android:name="com.lalit.levelforge.ui.workout.WorkoutLoggerFragment"
+        android:label="@string/workout_logger_title" />
 
 </navigation>

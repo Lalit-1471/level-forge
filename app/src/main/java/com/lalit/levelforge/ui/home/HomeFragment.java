@@ -49,6 +49,8 @@ public class HomeFragment extends Fragment {
                 Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_onboardingFragment));
         binding.exerciseLibraryButton.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_exerciseLibraryFragment));
+        binding.logWorkoutButton.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_homeFragment_to_workoutLoggerFragment));
     }
 
     @Override

@@ -15,6 +15,9 @@ public interface ExpEventDao {
     @Query("SELECT COALESCE(SUM(amount), 0) FROM exp_events")
     LiveData<Integer> observeTotalExp();
 
+    @Query("SELECT COALESCE(SUM(amount), 0) FROM exp_events")
+    int getTotalExp();
+
     @Query("SELECT * FROM exp_events ORDER BY createdAt DESC LIMIT :limit")
     LiveData<List<ExpEvent>> observeRecentEvents(int limit);
 

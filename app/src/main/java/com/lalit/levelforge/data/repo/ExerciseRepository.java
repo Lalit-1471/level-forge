@@ -34,7 +34,11 @@ public class ExerciseRepository {
     }
 
     public void seedDefaultExercises() {
-        diskExecutor.execute(() -> exerciseDao.insertDefaults(DefaultExercises.create()));
+        diskExecutor.execute(() -> {
+            if (exerciseDao.countExercises() == 0) {
+                exerciseDao.insertDefaults(DefaultExercises.create());
+            }
+        });
     }
 
     public void saveExercise(Exercise exercise) {

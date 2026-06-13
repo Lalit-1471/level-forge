@@ -10,6 +10,7 @@
     <string name="dashboard_weekly_summary_label">Weekly summary</string>
     <string name="dashboard_start_onboarding">Start awakening</string>
     <string name="dashboard_edit_profile">Review profile</string>
+    <string name="dashboard_log_workout">Log workout</string>
     <string name="dashboard_exercise_library">Exercise library</string>
     <string name="onboarding_title">Awakening Setup</string>
     <string name="onboarding_subtitle">Create your hunter profile and get a one-time nutrition target.</string>
@@ -42,4 +43,22 @@
     <string name="exercise_library_title">Exercise Library</string>
     <string name="exercise_library_subtitle">Default movements grouped by type, muscle target, and base EXP.</string>
     <string name="exercise_library_empty">Exercise library is loading.</string>
+    <string name="workout_logger_title">Workout Log</string>
+    <string name="workout_logger_subtitle">Add sets during training. EXP is only posted when you finish the workout.</string>
+    <string name="workout_title_hint">Workout title</string>
+    <string name="workout_exercise_label">Exercise</string>
+    <string name="workout_set_type_label">Set type</string>
+    <string name="workout_reps_hint">Reps</string>
+    <string name="workout_weight_hint">Weight kg</string>
+    <string name="workout_duration_hint">Duration sec</string>
+    <string name="workout_distance_hint">Distance m</string>
+    <string name="workout_assistance_hint">Assistance kg</string>
+    <string name="workout_overload">Progressive overload</string>
+    <string name="workout_add_set">Add set</string>
+    <string name="workout_post">Finish and post workout</string>
+    <string name="workout_preview_exp">%1$d preview EXP</string>
+    <string name="workout_empty_sets">No sets added yet.</string>
+    <string name="workout_saved">Workout posted. EXP awarded.</string>
+    <string name="workout_missing_exercise">Exercise library is still loading.</string>
+    <string name="workout_no_sets">Add at least one set before posting.</string>
 </resources>
