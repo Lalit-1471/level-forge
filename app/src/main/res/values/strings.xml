@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Level Forge</string>
+    <string name="dashboard_title">Level Forge</string>
+    <string name="dashboard_subtitle">A clean Java starter for your gym RPG tracker.</string>
+    <string name="dashboard_level_label">Current level</string>
+    <string name="dashboard_level_value">Level 1 Hunter</string>
+    <string name="dashboard_exp_label">EXP to next level</string>
+    <string name="dashboard_exp_value">0 / 300 EXP</string>
+    <string name="dashboard_daily_quest_label">Daily quest</string>
+    <string name="dashboard_weekly_summary_label">Weekly summary</string>
+</resources>
+
