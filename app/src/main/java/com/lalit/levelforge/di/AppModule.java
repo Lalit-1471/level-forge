@@ -5,7 +5,12 @@ import android.content.Context;
 import androidx.room.Room;
 
 import com.lalit.levelforge.data.local.AppDatabase;
+import com.lalit.levelforge.data.local.dao.ExerciseDao;
+import com.lalit.levelforge.data.local.dao.ExpEventDao;
+import com.lalit.levelforge.data.local.dao.LevelStateDao;
+import com.lalit.levelforge.data.local.dao.UserProfileDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSessionDao;
+import com.lalit.levelforge.data.local.dao.WorkoutSetDao;
 
 import javax.inject.Singleton;
 
@@ -34,5 +39,29 @@ public final class AppModule {
     static WorkoutSessionDao provideWorkoutSessionDao(AppDatabase appDatabase) {
         return appDatabase.workoutSessionDao();
     }
-}
 
+    @Provides
+    static WorkoutSetDao provideWorkoutSetDao(AppDatabase appDatabase) {
+        return appDatabase.workoutSetDao();
+    }
+
+    @Provides
+    static ExerciseDao provideExerciseDao(AppDatabase appDatabase) {
+        return appDatabase.exerciseDao();
+    }
+
+    @Provides
+    static ExpEventDao provideExpEventDao(AppDatabase appDatabase) {
+        return appDatabase.expEventDao();
+    }
+
+    @Provides
+    static LevelStateDao provideLevelStateDao(AppDatabase appDatabase) {
+        return appDatabase.levelStateDao();
+    }
+
+    @Provides
+    static UserProfileDao provideUserProfileDao(AppDatabase appDatabase) {
+        return appDatabase.userProfileDao();
+    }
+}

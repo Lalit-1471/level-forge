@@ -5,6 +5,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Upsert;
 
 import com.lalit.levelforge.data.local.entity.WorkoutSession;
 
@@ -16,7 +17,12 @@ public interface WorkoutSessionDao {
     @Query("SELECT * FROM workout_sessions ORDER BY completedAt DESC LIMIT 5")
     LiveData<List<WorkoutSession>> getRecentSessions();
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(WorkoutSession workoutSession);
-}
+    @Query("SELECT * FROM workout_sessions WHERE id = :sessionId")
+    LiveData<WorkoutSession> observeSession(long sessionId);
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    long insert(WorkoutSession workoutSession);
+
+    @Upsert
+    void upsert(WorkoutSession workoutSession);
+}
