@@ -30,6 +30,11 @@
         android:label="@string/exercise_library_title" />
 
     <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.lalit.levelforge.ui.profile.ProfileFragment"
+        android:label="@string/profile_title" />
+
+    <fragment
         android:id="@+id/workoutLoggerFragment"
         android:name="com.lalit.levelforge.ui.workout.WorkoutLoggerFragment"
         android:label="@string/workout_logger_title" />

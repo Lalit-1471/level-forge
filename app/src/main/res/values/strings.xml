@@ -12,6 +12,8 @@
     <string name="dashboard_edit_profile">Review profile</string>
     <string name="dashboard_log_workout">Log workout</string>
     <string name="dashboard_exercise_library">Exercise library</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_profile">Profile</string>
     <string name="onboarding_title">Awakening Setup</string>
     <string name="onboarding_subtitle">Create your hunter profile and get a one-time nutrition target.</string>
     <string name="onboarding_body_label">Body profile</string>
@@ -67,4 +69,12 @@
     <string name="workout_saved">Workout posted. EXP awarded.</string>
     <string name="workout_missing_exercise">Exercise library is still loading.</string>
     <string name="workout_no_sets">Add at least one set before posting.</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_subtitle">Posted workouts and earned training EXP.</string>
+    <string name="profile_summary_label">Training archive</string>
+    <string name="profile_summary_value">%1$d workouts • %2$d EXP earned</string>
+    <string name="profile_logged_workouts">Logged workouts</string>
+    <string name="profile_empty_workouts">No posted workouts yet. Finish and post a workout to see it here.</string>
+    <string name="profile_workout_meta">%1$s • %2$s</string>
+    <string name="profile_workout_exp">%1$d EXP</string>
 </resources>

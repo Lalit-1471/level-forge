@@ -31,6 +31,10 @@ public class WorkoutRepository {
         return workoutSessionDao.getRecentSessions();
     }
 
+    public LiveData<List<WorkoutSession>> observeCompletedSessions() {
+        return workoutSessionDao.observeCompletedSessions();
+    }
+
     public LiveData<WorkoutSession> observeSession(long sessionId) {
         return workoutSessionDao.observeSession(sessionId);
     }

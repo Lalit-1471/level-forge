@@ -17,6 +17,9 @@ public interface WorkoutSessionDao {
     @Query("SELECT * FROM workout_sessions ORDER BY completedAt DESC LIMIT 5")
     LiveData<List<WorkoutSession>> getRecentSessions();
 
+    @Query("SELECT * FROM workout_sessions WHERE completed = 1 ORDER BY completedAt DESC")
+    LiveData<List<WorkoutSession>> observeCompletedSessions();
+
     @Query("SELECT * FROM workout_sessions WHERE id = :sessionId")
     LiveData<WorkoutSession> observeSession(long sessionId);
 
