@@ -26,7 +26,9 @@ public class WorkoutLoggerViewModel extends ViewModel {
     private final LiveData<List<Exercise>> exercises;
     private final MutableLiveData<List<LoggedSet>> loggedSets = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<Integer> totalExp = new MutableLiveData<>(0);
+    private final MutableLiveData<Boolean> reviewMode = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> saved = new MutableLiveData<>(false);
+    private final long startedAtMillis = System.currentTimeMillis();
 
     @Inject
     public WorkoutLoggerViewModel(ExerciseRepository exerciseRepository,
@@ -50,6 +52,14 @@ public class WorkoutLoggerViewModel extends ViewModel {
 
     public LiveData<Boolean> getSaved() {
         return saved;
+    }
+
+    public LiveData<Boolean> getReviewMode() {
+        return reviewMode;
+    }
+
+    public long getStartedAtMillis() {
+        return startedAtMillis;
     }
 
     public void addSet(Exercise exercise, SetType setType, int reps, double weightKg,
@@ -77,7 +87,13 @@ public class WorkoutLoggerViewModel extends ViewModel {
         totalExp.setValue(sumExp(currentSets));
     }
 
-    public void finishWorkout(String title) {
+    public void finishWorkout() {
+        if (!safeLoggedSets().isEmpty()) {
+            reviewMode.setValue(true);
+        }
+    }
+
+    public void postWorkout(String title, int durationSeconds) {
         List<LoggedSet> currentSets = safeLoggedSets();
         if (currentSets.isEmpty()) {
             return;
@@ -88,11 +104,18 @@ public class WorkoutLoggerViewModel extends ViewModel {
             sets.add(loggedSet.getWorkoutSet());
         }
         int exp = sumExp(currentSets);
-        workoutLogRepository.saveCompletedWorkout(title, sets, exp, (sessionId, sessionExp) -> {
+        workoutLogRepository.saveCompletedWorkout(title, sets, exp, durationSeconds, (sessionId, sessionExp) -> {
             loggedSets.setValue(Collections.emptyList());
             totalExp.setValue(0);
+            reviewMode.setValue(false);
             saved.setValue(true);
         });
+    }
+
+    public void discardWorkout() {
+        loggedSets.setValue(Collections.emptyList());
+        totalExp.setValue(0);
+        reviewMode.setValue(false);
     }
 
     public void consumeSaved() {

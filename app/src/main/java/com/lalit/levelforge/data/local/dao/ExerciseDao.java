@@ -15,10 +15,10 @@ import java.util.List;
 @Dao
 public interface ExerciseDao {
 
-    @Query("SELECT * FROM exercises ORDER BY name")
+    @Query("SELECT * FROM exercises WHERE id IN (SELECT MIN(id) FROM exercises GROUP BY name) ORDER BY name")
     LiveData<List<Exercise>> observeExercises();
 
-    @Query("SELECT * FROM exercises WHERE primaryMuscleGroup = :muscleGroup ORDER BY name")
+    @Query("SELECT * FROM exercises WHERE id IN (SELECT MIN(id) FROM exercises GROUP BY name) AND primaryMuscleGroup = :muscleGroup ORDER BY name")
     LiveData<List<Exercise>> observeByPrimaryMuscle(MuscleGroup muscleGroup);
 
     @Query("SELECT COUNT(*) FROM exercises")

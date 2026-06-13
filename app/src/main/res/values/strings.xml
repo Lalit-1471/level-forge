@@ -44,8 +44,10 @@
     <string name="exercise_library_subtitle">Default movements grouped by type, muscle target, and base EXP.</string>
     <string name="exercise_library_empty">Exercise library is loading.</string>
     <string name="workout_logger_title">Workout Log</string>
-    <string name="workout_logger_subtitle">Add sets during training. EXP is only posted when you finish the workout.</string>
+    <string name="workout_logger_subtitle">Start training, add exercises and sets, then review before posting.</string>
     <string name="workout_title_hint">Workout title</string>
+    <string name="workout_timer_label">Timer</string>
+    <string name="workout_muscle_filter_label">Primary muscle</string>
     <string name="workout_exercise_label">Exercise</string>
     <string name="workout_set_type_label">Set type</string>
     <string name="workout_reps_hint">Reps</string>
@@ -55,7 +57,11 @@
     <string name="workout_assistance_hint">Assistance kg</string>
     <string name="workout_overload">Progressive overload</string>
     <string name="workout_add_set">Add set</string>
-    <string name="workout_post">Finish and post workout</string>
+    <string name="workout_finish">Finish workout</string>
+    <string name="workout_review_title">Workout review</string>
+    <string name="workout_review_summary">%1$d sets • %2$d preview EXP • %3$s elapsed</string>
+    <string name="workout_post">Post workout</string>
+    <string name="workout_discard">Discard workout</string>
     <string name="workout_preview_exp">%1$d preview EXP</string>
     <string name="workout_empty_sets">No sets added yet.</string>
     <string name="workout_saved">Workout posted. EXP awarded.</string>

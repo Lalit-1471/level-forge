@@ -33,6 +33,56 @@
             android:layout_marginTop="20dp"
             app:cardBackgroundColor="@color/slate_900"
             app:cardCornerRadius="8dp"
+            app:strokeColor="@color/orange_400"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/workout_timer_label"
+                        android:textColor="@color/slate_300"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/timerValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="@android:color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/previewExpValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="@color/orange_400"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/inputCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/slate_900"
+            app:cardCornerRadius="8dp"
             app:strokeColor="@color/slate_700"
             app:strokeWidth="1dp">
 
@@ -55,6 +105,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:text="@string/workout_muscle_filter_label"
+                    android:textColor="@color/slate_300" />
+
+                <Spinner
+                    android:id="@+id/muscleFilterSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:text="@string/workout_exercise_label"
                     android:textColor="@color/slate_300" />
 
@@ -62,6 +124,15 @@
                     android:id="@+id/exerciseSpinner"
                     android:layout_width="match_parent"
                     android:layout_height="48dp" />
+
+                <TextView
+                    android:id="@+id/exerciseTypeValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/teal_300"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -75,61 +146,41 @@
                     android:layout_width="match_parent"
                     android:layout_height="48dp" />
 
-                <LinearLayout
+                <EditText
+                    android:id="@+id/repsInput"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="48dp"
+                    android:hint="@string/workout_reps_hint"
+                    android:inputType="number"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
 
-                    <EditText
-                        android:id="@+id/repsInput"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1"
-                        android:hint="@string/workout_reps_hint"
-                        android:inputType="number"
-                        android:textColor="@android:color/white"
-                        android:textColorHint="@color/slate_300" />
-
-                    <EditText
-                        android:id="@+id/weightInput"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_weight="1"
-                        android:hint="@string/workout_weight_hint"
-                        android:inputType="numberDecimal"
-                        android:textColor="@android:color/white"
-                        android:textColorHint="@color/slate_300" />
-                </LinearLayout>
-
-                <LinearLayout
+                <EditText
+                    android:id="@+id/weightInput"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="48dp"
+                    android:hint="@string/workout_weight_hint"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
 
-                    <EditText
-                        android:id="@+id/durationInput"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_weight="1"
-                        android:hint="@string/workout_duration_hint"
-                        android:inputType="number"
-                        android:textColor="@android:color/white"
-                        android:textColorHint="@color/slate_300" />
+                <EditText
+                    android:id="@+id/durationInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/workout_duration_hint"
+                    android:inputType="number"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
 
-                    <EditText
-                        android:id="@+id/distanceInput"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_weight="1"
-                        android:hint="@string/workout_distance_hint"
-                        android:inputType="numberDecimal"
-                        android:textColor="@android:color/white"
-                        android:textColorHint="@color/slate_300" />
-                </LinearLayout>
+                <EditText
+                    android:id="@+id/distanceInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:hint="@string/workout_distance_hint"
+                    android:inputType="numberDecimal"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@color/slate_300" />
 
                 <EditText
                     android:id="@+id/assistanceInput"
@@ -164,6 +215,48 @@
             android:layout_marginTop="16dp"
             app:cardBackgroundColor="@color/slate_900"
             app:cardCornerRadius="8dp"
+            app:strokeColor="@color/slate_700"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/emptySetsText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/workout_empty_sets"
+                    android:textColor="@color/slate_300"
+                    android:textSize="15sp" />
+
+                <LinearLayout
+                    android:id="@+id/loggedSetContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/finishWorkoutButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="14dp"
+                    android:text="@string/workout_finish"
+                    android:textAllCaps="false"
+                    app:cornerRadius="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/reviewCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/slate_900"
+            app:cardCornerRadius="8dp"
             app:strokeColor="@color/orange_400"
             app:strokeWidth="1dp">
 
@@ -174,28 +267,21 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/previewExpValue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:textSize="22sp"
+                    android:text="@string/workout_review_title"
+                    android:textColor="@color/orange_400"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/emptySetsText"
+                    android:id="@+id/reviewSummaryValue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/workout_empty_sets"
-                    android:textColor="@color/slate_300"
-                    android:textSize="15sp" />
-
-                <LinearLayout
-                    android:id="@+id/loggedSetContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="vertical" />
+                    android:layout_marginTop="8dp"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/postWorkoutButton"
@@ -205,6 +291,18 @@
                     android:text="@string/workout_post"
                     android:textAllCaps="false"
                     app:cornerRadius="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/discardWorkoutButton"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/workout_discard"
+                    android:textAllCaps="false"
+                    android:textColor="@color/slate_200"
+                    app:cornerRadius="8dp"
+                    app:strokeColor="@color/slate_700" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
