@@ -1,46 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/slate_950">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/workoutContent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/workout_logger_title"
-            android:textColor="@android:color/white"
-            android:textSize="28sp"
-            android:textStyle="bold" />
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/workout_logger_subtitle"
-            android:textColor="@color/slate_200"
-            android:textSize="16sp" />
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/slate_900"
-            app:cardCornerRadius="8dp"
-            app:strokeColor="@color/orange_400"
-            app:strokeWidth="1dp">
+            android:orientation="vertical"
+            android:padding="18dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -51,259 +31,194 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/workout_timer_label"
-                        android:textColor="@color/slate_300"
-                        android:textSize="14sp" />
+                        android:text="@string/workout_logger_title"
+                        android:textColor="@android:color/white"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/timerValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textColor="@android:color/white"
-                        android:textSize="26sp"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/teal_300"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/previewExpValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textColor="@color/orange_400"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/inputCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/slate_900"
-            app:cardCornerRadius="8dp"
-            app:strokeColor="@color/slate_700"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <EditText
-                    android:id="@+id/workoutTitleInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:hint="@string/workout_title_hint"
-                    android:inputType="textCapWords"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@color/slate_300" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/workout_muscle_filter_label"
-                    android:textColor="@color/slate_300" />
-
-                <Spinner
-                    android:id="@+id/muscleFilterSpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/workout_exercise_label"
-                    android:textColor="@color/slate_300" />
-
-                <Spinner
-                    android:id="@+id/exerciseSpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp" />
-
-                <TextView
-                    android:id="@+id/exerciseTypeValue"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/teal_300"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/workout_set_type_label"
-                    android:textColor="@color/slate_300" />
-
-                <Spinner
-                    android:id="@+id/setTypeSpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp" />
-
-                <EditText
-                    android:id="@+id/repsInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:hint="@string/workout_reps_hint"
-                    android:inputType="number"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@color/slate_300" />
-
-                <EditText
-                    android:id="@+id/weightInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:hint="@string/workout_weight_hint"
-                    android:inputType="numberDecimal"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@color/slate_300" />
-
-                <EditText
-                    android:id="@+id/durationInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:hint="@string/workout_duration_hint"
-                    android:inputType="number"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@color/slate_300" />
-
-                <EditText
-                    android:id="@+id/distanceInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:hint="@string/workout_distance_hint"
-                    android:inputType="numberDecimal"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@color/slate_300" />
-
-                <EditText
-                    android:id="@+id/assistanceInput"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:hint="@string/workout_assistance_hint"
-                    android:inputType="numberDecimal"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@color/slate_300" />
-
-                <CheckBox
-                    android:id="@+id/progressiveOverloadCheckBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/workout_overload"
-                    android:textColor="@color/slate_200" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/addSetButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/workout_add_set"
-                    android:textAllCaps="false"
-                    app:cornerRadius="8dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/slate_900"
-            app:cardCornerRadius="8dp"
-            app:strokeColor="@color/slate_700"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/emptySetsText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/workout_empty_sets"
-                    android:textColor="@color/slate_300"
-                    android:textSize="15sp" />
-
-                <LinearLayout
-                    android:id="@+id/loggedSetContainer"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/finishWorkoutButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="14dp"
-                    android:text="@string/workout_finish"
-                    android:textAllCaps="false"
-                    app:cornerRadius="8dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/reviewCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"
-            app:cardBackgroundColor="@color/slate_900"
-            app:cardCornerRadius="8dp"
-            app:strokeColor="@color/orange_400"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/workout_review_title"
-                    android:textColor="@color/orange_400"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/reviewSummaryValue"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="@android:color/white"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/postWorkoutButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="14dp"
-                    android:text="@string/workout_post"
-                    android:textAllCaps="false"
-                    app:cornerRadius="8dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/discardWorkoutButton"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/workout_discard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:text="@string/workout_finish"
                     android:textAllCaps="false"
                     android:textColor="@color/slate_200"
                     app:cornerRadius="8dp"
-                    app:strokeColor="@color/slate_700" />
+                    app:strokeColor="@color/orange_400" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-    </LinearLayout>
-</ScrollView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/workout_logger_subtitle"
+                android:textColor="@color/slate_200"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/previewExpValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:textColor="@color/orange_400"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/emptyWorkoutText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:gravity="center"
+                android:text="@string/workout_empty_sets"
+                android:textColor="@color/slate_300"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/exerciseContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/addExerciseButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/workout_add_exercise"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:id="@+id/pickerContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/slate_950"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/workout_add_exercise_title"
+                    android:textColor="@android:color/white"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cancelPickerButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:text="@string/workout_cancel"
+                    android:textAllCaps="false"
+                    android:textColor="@color/slate_200" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/workout_muscle_filter_label"
+                android:textColor="@color/slate_300" />
+
+            <Spinner
+                android:id="@+id/muscleFilterSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="48dp" />
+
+            <LinearLayout
+                android:id="@+id/exercisePickerContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:id="@+id/reviewContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/slate_950"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="18dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/workout_review_title"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/reviewSummaryValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/orange_400"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/reviewExerciseContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/postWorkoutButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/workout_post"
+                android:textAllCaps="false"
+                app:cornerRadius="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/discardWorkoutButton"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/workout_discard"
+                android:textAllCaps="false"
+                android:textColor="@color/slate_200"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/slate_700" />
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

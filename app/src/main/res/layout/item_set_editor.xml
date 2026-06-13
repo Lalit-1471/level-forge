@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:background="@color/slate_800"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <Spinner
+        android:id="@+id/setTypeSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="44dp" />
+
+    <EditText
+        android:id="@+id/repsInput"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:hint="@string/workout_reps_hint"
+        android:inputType="number"
+        android:textColor="@android:color/white"
+        android:textColorHint="@color/slate_300" />
+
+    <EditText
+        android:id="@+id/weightInput"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:hint="@string/workout_weight_hint"
+        android:inputType="numberDecimal"
+        android:textColor="@android:color/white"
+        android:textColorHint="@color/slate_300" />
+
+    <EditText
+        android:id="@+id/durationInput"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:hint="@string/workout_duration_hint"
+        android:inputType="number"
+        android:textColor="@android:color/white"
+        android:textColorHint="@color/slate_300" />
+
+    <EditText
+        android:id="@+id/distanceInput"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:hint="@string/workout_distance_hint"
+        android:inputType="numberDecimal"
+        android:textColor="@android:color/white"
+        android:textColorHint="@color/slate_300" />
+
+    <EditText
+        android:id="@+id/assistanceInput"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:hint="@string/workout_assistance_hint"
+        android:inputType="numberDecimal"
+        android:textColor="@android:color/white"
+        android:textColorHint="@color/slate_300" />
+
+    <CheckBox
+        android:id="@+id/progressiveOverloadCheckBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/workout_overload"
+        android:textColor="@color/slate_200" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/saveSetButton"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginTop="6dp"
+        android:text="@string/workout_save_set"
+        android:textAllCaps="false"
+        app:cornerRadius="8dp" />
+</LinearLayout>

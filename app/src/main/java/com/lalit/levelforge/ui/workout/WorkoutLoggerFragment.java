@@ -22,7 +22,10 @@ import com.lalit.levelforge.data.model.ExerciseType;
 import com.lalit.levelforge.data.model.MuscleGroup;
 import com.lalit.levelforge.data.model.SetType;
 import com.lalit.levelforge.databinding.FragmentWorkoutLoggerBinding;
+import com.lalit.levelforge.databinding.ItemExerciseBinding;
 import com.lalit.levelforge.databinding.ItemLoggedSetBinding;
+import com.lalit.levelforge.databinding.ItemSetEditorBinding;
+import com.lalit.levelforge.databinding.ItemWorkoutExerciseBinding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +41,9 @@ public class WorkoutLoggerFragment extends Fragment {
     private final Handler timerHandler = new Handler(Looper.getMainLooper());
     private final List<Exercise> allExercises = new ArrayList<>();
     private final List<Exercise> visibleExercises = new ArrayList<>();
+    private List<LoggedExercise> latestLoggedExercises = new ArrayList<>();
+    private long editingExerciseId = -1L;
     private int lastTotalExp;
-    private int lastSetCount;
 
     private final Runnable timerRunnable = new Runnable() {
         @Override
@@ -61,19 +65,21 @@ public class WorkoutLoggerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(WorkoutLoggerViewModel.class);
-
         setupMuscleFilters();
-        setupSetTypes();
         timerHandler.post(timerRunnable);
 
-        viewModel.getExercises().observe(getViewLifecycleOwner(), this::renderExerciseChoices);
-        viewModel.getLoggedSets().observe(getViewLifecycleOwner(), this::renderLoggedSets);
+        viewModel.getExercises().observe(getViewLifecycleOwner(), this::renderExercisePicker);
+        viewModel.getLoggedExercises().observe(getViewLifecycleOwner(), this::renderWorkout);
         viewModel.getTotalExp().observe(getViewLifecycleOwner(), exp -> {
             lastTotalExp = exp == null ? 0 : exp;
             binding.previewExpValue.setText(getString(R.string.workout_preview_exp, lastTotalExp));
             updateReviewSummary();
         });
-        viewModel.getReviewMode().observe(getViewLifecycleOwner(), this::renderReviewMode);
+        viewModel.getReviewMode().observe(getViewLifecycleOwner(), reviewing -> {
+            if (reviewing != null && reviewing) {
+                showReview();
+            }
+        });
         viewModel.getSaved().observe(getViewLifecycleOwner(), saved -> {
             if (saved != null && saved) {
                 Toast.makeText(requireContext(), R.string.workout_saved, Toast.LENGTH_SHORT).show();
@@ -82,11 +88,11 @@ public class WorkoutLoggerFragment extends Fragment {
             }
         });
 
+        binding.addExerciseButton.setOnClickListener(v -> showPicker());
+        binding.cancelPickerButton.setOnClickListener(v -> showWorkout());
         binding.muscleFilterSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener(this::filterExercises));
-        binding.exerciseSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener(this::renderSelectedExerciseFields));
-        binding.addSetButton.setOnClickListener(v -> addSet());
         binding.finishWorkoutButton.setOnClickListener(v -> finishWorkout());
-        binding.postWorkoutButton.setOnClickListener(v -> postWorkout());
+        binding.postWorkoutButton.setOnClickListener(v -> viewModel.postWorkout("Workout", elapsedSeconds()));
         binding.discardWorkoutButton.setOnClickListener(v -> {
             viewModel.discardWorkout();
             Navigation.findNavController(v).popBackStack();
@@ -99,13 +105,7 @@ public class WorkoutLoggerFragment extends Fragment {
         binding.muscleFilterSpinner.setAdapter(adapter);
     }
 
-    private void setupSetTypes() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, setTypeLabels());
-        adapter.setDropDownViewResource(R.layout.item_spinner_dropdown);
-        binding.setTypeSpinner.setAdapter(adapter);
-    }
-
-    private void renderExerciseChoices(List<Exercise> loadedExercises) {
+    private void renderExercisePicker(List<Exercise> loadedExercises) {
         allExercises.clear();
         if (loadedExercises != null) {
             allExercises.addAll(loadedExercises);
@@ -114,6 +114,9 @@ public class WorkoutLoggerFragment extends Fragment {
     }
 
     private void filterExercises() {
+        if (binding == null) {
+            return;
+        }
         visibleExercises.clear();
         int selectedFilter = binding.muscleFilterSpinner.getSelectedItemPosition();
         MuscleGroup selectedMuscle = selectedFilter <= 0 ? null : MuscleGroup.values()[selectedFilter - 1];
@@ -124,24 +127,94 @@ public class WorkoutLoggerFragment extends Fragment {
             }
         }
 
-        List<String> labels = new ArrayList<>();
+        binding.exercisePickerContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
         for (Exercise exercise : visibleExercises) {
-            labels.add(exercise.getName());
+            ItemExerciseBinding itemBinding = ItemExerciseBinding.inflate(inflater, binding.exercisePickerContainer, false);
+            itemBinding.exerciseName.setText(exercise.getName());
+            itemBinding.exerciseType.setText(pretty(exercise.getExerciseType().name()));
+            itemBinding.exerciseMuscles.setText(primaryAndSecondary(exercise));
+            itemBinding.exerciseExp.setText(exercise.getBaseExp() + " base EXP");
+            itemBinding.getRoot().setOnClickListener(v -> {
+                viewModel.addExercise(exercise);
+                editingExerciseId = exercise.getId();
+                showWorkout();
+            });
+            binding.exercisePickerContainer.addView(itemBinding.getRoot());
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, labels);
-        adapter.setDropDownViewResource(R.layout.item_spinner_dropdown);
-        binding.exerciseSpinner.setAdapter(adapter);
-        renderSelectedExerciseFields();
     }
 
-    private void renderSelectedExerciseFields() {
-        Exercise exercise = selectedExercise();
-        if (exercise == null) {
-            return;
-        }
+    private void renderWorkout(List<LoggedExercise> loggedExercises) {
+        latestLoggedExercises = loggedExercises == null ? new ArrayList<>() : new ArrayList<>(loggedExercises);
+        binding.emptyWorkoutText.setVisibility(latestLoggedExercises.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.exerciseContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
 
-        ExerciseType type = exercise.getExerciseType();
+        for (LoggedExercise loggedExercise : latestLoggedExercises) {
+            ItemWorkoutExerciseBinding itemBinding = ItemWorkoutExerciseBinding.inflate(inflater, binding.exerciseContainer, false);
+            itemBinding.exerciseName.setText(loggedExercise.getExercise().getName());
+            itemBinding.exerciseType.setText(pretty(loggedExercise.getExercise().getExerciseType().name()));
+            renderSets(itemBinding, loggedExercise);
+            if (editingExerciseId == loggedExercise.getExercise().getId()) {
+                renderEditor(itemBinding, loggedExercise.getExercise());
+            }
+            itemBinding.addSetButton.setOnClickListener(v -> {
+                editingExerciseId = loggedExercise.getExercise().getId();
+                renderWorkout(latestLoggedExercises);
+            });
+            binding.exerciseContainer.addView(itemBinding.getRoot());
+        }
+        renderReviewExercises();
+        updateReviewSummary();
+    }
+
+    private void renderSets(ItemWorkoutExerciseBinding itemBinding, LoggedExercise loggedExercise) {
+        itemBinding.setContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        int index = 0;
+        for (LoggedSet loggedSet : loggedExercise.getSets()) {
+            ItemLoggedSetBinding setBinding = ItemLoggedSetBinding.inflate(inflater, itemBinding.setContainer, false);
+            setBinding.loggedSetTitle.setText("Set " + loggedSet.getWorkoutSet().getSetNumber());
+            setBinding.loggedSetDetails.setText(setDetails(loggedSet));
+            setBinding.loggedSetExp.setText(loggedSet.getExp() + " EXP");
+            int setIndex = index;
+            setBinding.getRoot().setOnClickListener(v -> {
+                viewModel.removeSet(loggedExercise.getExercise().getId(), setIndex);
+                Toast.makeText(requireContext(), "Set removed", Toast.LENGTH_SHORT).show();
+            });
+            itemBinding.setContainer.addView(setBinding.getRoot());
+            index++;
+        }
+    }
+
+    private void renderEditor(ItemWorkoutExerciseBinding itemBinding, Exercise exercise) {
+        itemBinding.editorContainer.removeAllViews();
+        ItemSetEditorBinding editorBinding = ItemSetEditorBinding.inflate(LayoutInflater.from(requireContext()), itemBinding.editorContainer, false);
+        setupSetTypeSpinner(editorBinding);
+        configureEditorFields(editorBinding, exercise.getExerciseType());
+        editorBinding.saveSetButton.setOnClickListener(v -> {
+            viewModel.addSet(
+                    exercise.getId(),
+                    selectedSetType(editorBinding),
+                    optionalInt(editorBinding.repsInput),
+                    optionalDouble(editorBinding.weightInput),
+                    optionalInt(editorBinding.durationInput),
+                    optionalDouble(editorBinding.distanceInput),
+                    optionalDouble(editorBinding.assistanceInput),
+                    editorBinding.progressiveOverloadCheckBox.isChecked()
+            );
+            editingExerciseId = -1L;
+        });
+        itemBinding.editorContainer.addView(editorBinding.getRoot());
+    }
+
+    private void setupSetTypeSpinner(ItemSetEditorBinding editorBinding) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.item_spinner, setTypeLabels());
+        adapter.setDropDownViewResource(R.layout.item_spinner_dropdown);
+        editorBinding.setTypeSpinner.setAdapter(adapter);
+    }
+
+    private void configureEditorFields(ItemSetEditorBinding editorBinding, ExerciseType type) {
         boolean reps = type == ExerciseType.WEIGHT_REPS
                 || type == ExerciseType.BODYWEIGHT_REPS
                 || type == ExerciseType.WEIGHTED_BODYWEIGHT
@@ -157,84 +230,62 @@ public class WorkoutLoggerFragment extends Fragment {
                 || type == ExerciseType.WEIGHT_DISTANCE;
         boolean assistance = type == ExerciseType.ASSISTED_BODYWEIGHT;
 
-        binding.repsInput.setVisibility(reps ? View.VISIBLE : View.GONE);
-        binding.weightInput.setVisibility(weight ? View.VISIBLE : View.GONE);
-        binding.durationInput.setVisibility(duration ? View.VISIBLE : View.GONE);
-        binding.distanceInput.setVisibility(distance ? View.VISIBLE : View.GONE);
-        binding.assistanceInput.setVisibility(assistance ? View.VISIBLE : View.GONE);
-        binding.exerciseTypeValue.setText(pretty(type.name()));
+        editorBinding.repsInput.setVisibility(reps ? View.VISIBLE : View.GONE);
+        editorBinding.weightInput.setVisibility(weight ? View.VISIBLE : View.GONE);
+        editorBinding.durationInput.setVisibility(duration ? View.VISIBLE : View.GONE);
+        editorBinding.distanceInput.setVisibility(distance ? View.VISIBLE : View.GONE);
+        editorBinding.assistanceInput.setVisibility(assistance ? View.VISIBLE : View.GONE);
     }
 
-    private void addSet() {
-        Exercise exercise = selectedExercise();
-        if (exercise == null) {
-            Toast.makeText(requireContext(), R.string.workout_missing_exercise, Toast.LENGTH_SHORT).show();
+    private void renderReviewExercises() {
+        if (binding == null) {
             return;
         }
-
-        viewModel.addSet(
-                exercise,
-                selectedSetType(),
-                optionalInt(binding.repsInput),
-                optionalDouble(binding.weightInput),
-                optionalInt(binding.durationInput),
-                optionalDouble(binding.distanceInput),
-                optionalDouble(binding.assistanceInput),
-                binding.progressiveOverloadCheckBox.isChecked()
-        );
-        clearSetInputs();
-        renderSelectedExerciseFields();
+        binding.reviewExerciseContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        for (LoggedExercise loggedExercise : latestLoggedExercises) {
+            ItemWorkoutExerciseBinding itemBinding = ItemWorkoutExerciseBinding.inflate(inflater, binding.reviewExerciseContainer, false);
+            itemBinding.exerciseName.setText(loggedExercise.getExercise().getName());
+            itemBinding.exerciseType.setText(pretty(loggedExercise.getExercise().getExerciseType().name()));
+            itemBinding.addSetButton.setVisibility(View.GONE);
+            renderSets(itemBinding, loggedExercise);
+            binding.reviewExerciseContainer.addView(itemBinding.getRoot());
+        }
     }
 
     private void finishWorkout() {
-        if (lastSetCount == 0) {
+        if (viewModel.setCount() == 0) {
             Toast.makeText(requireContext(), R.string.workout_no_sets, Toast.LENGTH_SHORT).show();
             return;
         }
         viewModel.finishWorkout();
     }
 
-    private void postWorkout() {
-        String title = binding.workoutTitleInput.getText().toString().trim();
-        if (title.isEmpty()) {
-            title = "Strength workout";
-        }
-        viewModel.postWorkout(title, elapsedSeconds());
+    private void showWorkout() {
+        binding.workoutContent.setVisibility(View.VISIBLE);
+        binding.pickerContent.setVisibility(View.GONE);
+        binding.reviewContent.setVisibility(View.GONE);
     }
 
-    private void renderLoggedSets(List<LoggedSet> sets) {
-        binding.loggedSetContainer.removeAllViews();
-        lastSetCount = sets == null ? 0 : sets.size();
-        updateReviewSummary();
-        if (sets == null || sets.isEmpty()) {
-            binding.emptySetsText.setVisibility(View.VISIBLE);
-            return;
-        }
-
-        binding.emptySetsText.setVisibility(View.GONE);
-        LayoutInflater inflater = LayoutInflater.from(requireContext());
-        int index = 1;
-        for (LoggedSet loggedSet : sets) {
-            ItemLoggedSetBinding itemBinding = ItemLoggedSetBinding.inflate(inflater, binding.loggedSetContainer, false);
-            itemBinding.loggedSetTitle.setText(index + ". " + loggedSet.getExercise().getName());
-            itemBinding.loggedSetDetails.setText(setDetails(loggedSet));
-            itemBinding.loggedSetExp.setText(loggedSet.getExp() + " EXP");
-            binding.loggedSetContainer.addView(itemBinding.getRoot());
-            index++;
-        }
+    private void showPicker() {
+        binding.workoutContent.setVisibility(View.GONE);
+        binding.pickerContent.setVisibility(View.VISIBLE);
+        binding.reviewContent.setVisibility(View.GONE);
     }
 
-    private void renderReviewMode(Boolean reviewMode) {
-        boolean reviewing = reviewMode != null && reviewMode;
-        binding.inputCard.setVisibility(reviewing ? View.GONE : View.VISIBLE);
-        binding.finishWorkoutButton.setVisibility(reviewing ? View.GONE : View.VISIBLE);
-        binding.reviewCard.setVisibility(reviewing ? View.VISIBLE : View.GONE);
+    private void showReview() {
+        renderReviewExercises();
         updateReviewSummary();
+        binding.workoutContent.setVisibility(View.GONE);
+        binding.pickerContent.setVisibility(View.GONE);
+        binding.reviewContent.setVisibility(View.VISIBLE);
     }
 
     private void updateTimer() {
-        String elapsed = formatElapsed(elapsedSeconds());
-        binding.timerValue.setText(elapsed);
+        if (binding == null) {
+            return;
+        }
+        binding.timerValue.setText(formatElapsed(elapsedSeconds()));
         updateReviewSummary();
     }
 
@@ -244,18 +295,20 @@ public class WorkoutLoggerFragment extends Fragment {
         }
         binding.reviewSummaryValue.setText(getString(
                 R.string.workout_review_summary,
-                lastSetCount,
+                latestLoggedExercises.size(),
+                viewModel.setCount(),
                 lastTotalExp,
                 formatElapsed(elapsedSeconds())
         ));
     }
 
-    private Exercise selectedExercise() {
-        int position = binding.exerciseSpinner.getSelectedItemPosition();
-        if (position < 0 || position >= visibleExercises.size()) {
-            return null;
+    private String primaryAndSecondary(Exercise exercise) {
+        String primary = pretty(exercise.getPrimaryMuscleGroup().name());
+        String secondary = exercise.getSecondaryMuscleGroups();
+        if (secondary == null || secondary.trim().isEmpty()) {
+            return primary;
         }
-        return visibleExercises.get(position);
+        return primary + " + " + pretty(secondary);
     }
 
     private String setDetails(LoggedSet loggedSet) {
@@ -282,8 +335,8 @@ public class WorkoutLoggerFragment extends Fragment {
         return String.join(" • ", parts);
     }
 
-    private SetType selectedSetType() {
-        int position = binding.setTypeSpinner.getSelectedItemPosition();
+    private SetType selectedSetType(ItemSetEditorBinding editorBinding) {
+        int position = editorBinding.setTypeSpinner.getSelectedItemPosition();
         if (position == 1) {
             return SetType.WARMUP;
         }
@@ -328,15 +381,6 @@ public class WorkoutLoggerFragment extends Fragment {
         }
         String value = editText.getText().toString().trim();
         return value.isEmpty() ? 0 : Double.parseDouble(value);
-    }
-
-    private void clearSetInputs() {
-        binding.repsInput.setText("");
-        binding.weightInput.setText("");
-        binding.durationInput.setText("");
-        binding.distanceInput.setText("");
-        binding.assistanceInput.setText("");
-        binding.progressiveOverloadCheckBox.setChecked(false);
     }
 
     private int elapsedSeconds() {

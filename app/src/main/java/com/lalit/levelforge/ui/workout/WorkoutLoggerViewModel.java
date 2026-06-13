@@ -24,7 +24,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
 
     private final WorkoutLogRepository workoutLogRepository;
     private final LiveData<List<Exercise>> exercises;
-    private final MutableLiveData<List<LoggedSet>> loggedSets = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<List<LoggedExercise>> loggedExercises = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<Integer> totalExp = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> reviewMode = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> saved = new MutableLiveData<>(false);
@@ -42,8 +42,8 @@ public class WorkoutLoggerViewModel extends ViewModel {
         return exercises;
     }
 
-    public LiveData<List<LoggedSet>> getLoggedSets() {
-        return loggedSets;
+    public LiveData<List<LoggedExercise>> getLoggedExercises() {
+        return loggedExercises;
     }
 
     public LiveData<Integer> getTotalExp() {
@@ -62,50 +62,83 @@ public class WorkoutLoggerViewModel extends ViewModel {
         return startedAtMillis;
     }
 
-    public void addSet(Exercise exercise, SetType setType, int reps, double weightKg,
-                       int durationSeconds, double distanceMeters, double assistanceKg,
-                       boolean progressiveOverload) {
-        if (exercise == null) {
+    public void addExercise(Exercise exercise) {
+        if (exercise == null || containsExercise(exercise.getId())) {
             return;
         }
+        List<LoggedExercise> current = new ArrayList<>(safeLoggedExercises());
+        current.add(new LoggedExercise(exercise));
+        loggedExercises.setValue(Collections.unmodifiableList(current));
+    }
 
-        List<LoggedSet> currentSets = new ArrayList<>(safeLoggedSets());
-        WorkoutSet workoutSet = new WorkoutSet();
-        workoutSet.setExerciseId(exercise.getId());
-        workoutSet.setSetNumber(currentSets.size() + 1);
-        workoutSet.setSetType(setType);
-        workoutSet.setReps(reps);
-        workoutSet.setWeightKg(weightKg);
-        workoutSet.setDurationSeconds(durationSeconds);
-        workoutSet.setDistanceMeters(distanceMeters);
-        workoutSet.setAssistanceKg(assistanceKg);
-        workoutSet.setCompleted(true);
+    public void addSet(long exerciseId, SetType setType, int reps, double weightKg,
+                       int durationSeconds, double distanceMeters, double assistanceKg,
+                       boolean progressiveOverload) {
+        List<LoggedExercise> updatedExercises = new ArrayList<>();
+        for (LoggedExercise loggedExercise : safeLoggedExercises()) {
+            if (loggedExercise.getExercise().getId() != exerciseId) {
+                updatedExercises.add(loggedExercise);
+                continue;
+            }
 
-        int exp = ExpCalculator.expForSet(exercise, workoutSet, progressiveOverload);
-        currentSets.add(new LoggedSet(exercise, workoutSet, exp));
-        loggedSets.setValue(Collections.unmodifiableList(currentSets));
-        totalExp.setValue(sumExp(currentSets));
+            List<LoggedSet> updatedSets = new ArrayList<>(loggedExercise.getSets());
+            WorkoutSet workoutSet = new WorkoutSet();
+            workoutSet.setExerciseId(exerciseId);
+            workoutSet.setSetNumber(updatedSets.size() + 1);
+            workoutSet.setSetType(setType);
+            workoutSet.setReps(reps);
+            workoutSet.setWeightKg(weightKg);
+            workoutSet.setDurationSeconds(durationSeconds);
+            workoutSet.setDistanceMeters(distanceMeters);
+            workoutSet.setAssistanceKg(assistanceKg);
+            workoutSet.setCompleted(true);
+
+            int exp = ExpCalculator.expForSet(loggedExercise.getExercise(), workoutSet, progressiveOverload);
+            updatedSets.add(new LoggedSet(loggedExercise.getExercise(), workoutSet, exp));
+            updatedExercises.add(new LoggedExercise(loggedExercise.getExercise(), updatedSets));
+        }
+        loggedExercises.setValue(Collections.unmodifiableList(updatedExercises));
+        totalExp.setValue(sumExp(updatedExercises));
+    }
+
+    public void removeSet(long exerciseId, int setIndex) {
+        List<LoggedExercise> updatedExercises = new ArrayList<>();
+        for (LoggedExercise loggedExercise : safeLoggedExercises()) {
+            if (loggedExercise.getExercise().getId() != exerciseId) {
+                updatedExercises.add(loggedExercise);
+                continue;
+            }
+            List<LoggedSet> updatedSets = new ArrayList<>(loggedExercise.getSets());
+            if (setIndex >= 0 && setIndex < updatedSets.size()) {
+                updatedSets.remove(setIndex);
+            }
+            updatedExercises.add(new LoggedExercise(loggedExercise.getExercise(), renumberSets(updatedSets)));
+        }
+        loggedExercises.setValue(Collections.unmodifiableList(updatedExercises));
+        totalExp.setValue(sumExp(updatedExercises));
     }
 
     public void finishWorkout() {
-        if (!safeLoggedSets().isEmpty()) {
+        if (setCount() > 0) {
             reviewMode.setValue(true);
         }
     }
 
     public void postWorkout(String title, int durationSeconds) {
-        List<LoggedSet> currentSets = safeLoggedSets();
-        if (currentSets.isEmpty()) {
+        List<LoggedExercise> currentExercises = safeLoggedExercises();
+        List<WorkoutSet> sets = new ArrayList<>();
+        for (LoggedExercise loggedExercise : currentExercises) {
+            for (LoggedSet loggedSet : loggedExercise.getSets()) {
+                sets.add(loggedSet.getWorkoutSet());
+            }
+        }
+        if (sets.isEmpty()) {
             return;
         }
 
-        List<WorkoutSet> sets = new ArrayList<>();
-        for (LoggedSet loggedSet : currentSets) {
-            sets.add(loggedSet.getWorkoutSet());
-        }
-        int exp = sumExp(currentSets);
+        int exp = sumExp(currentExercises);
         workoutLogRepository.saveCompletedWorkout(title, sets, exp, durationSeconds, (sessionId, sessionExp) -> {
-            loggedSets.setValue(Collections.emptyList());
+            loggedExercises.setValue(Collections.emptyList());
             totalExp.setValue(0);
             reviewMode.setValue(false);
             saved.setValue(true);
@@ -113,7 +146,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
     }
 
     public void discardWorkout() {
-        loggedSets.setValue(Collections.emptyList());
+        loggedExercises.setValue(Collections.emptyList());
         totalExp.setValue(0);
         reviewMode.setValue(false);
     }
@@ -122,15 +155,45 @@ public class WorkoutLoggerViewModel extends ViewModel {
         saved.setValue(false);
     }
 
-    private List<LoggedSet> safeLoggedSets() {
-        List<LoggedSet> value = loggedSets.getValue();
+    public int setCount() {
+        int count = 0;
+        for (LoggedExercise loggedExercise : safeLoggedExercises()) {
+            count += loggedExercise.getSets().size();
+        }
+        return count;
+    }
+
+    private boolean containsExercise(long exerciseId) {
+        for (LoggedExercise loggedExercise : safeLoggedExercises()) {
+            if (loggedExercise.getExercise().getId() == exerciseId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<LoggedExercise> safeLoggedExercises() {
+        List<LoggedExercise> value = loggedExercises.getValue();
         return value == null ? Collections.emptyList() : value;
     }
 
-    private int sumExp(List<LoggedSet> sets) {
+    private List<LoggedSet> renumberSets(List<LoggedSet> sets) {
+        List<LoggedSet> renumbered = new ArrayList<>();
+        int setNumber = 1;
+        for (LoggedSet loggedSet : sets) {
+            loggedSet.getWorkoutSet().setSetNumber(setNumber);
+            renumbered.add(loggedSet);
+            setNumber++;
+        }
+        return renumbered;
+    }
+
+    private int sumExp(List<LoggedExercise> exercises) {
         int sum = 0;
-        for (LoggedSet set : sets) {
-            sum += set.getExp();
+        for (LoggedExercise loggedExercise : exercises) {
+            for (LoggedSet set : loggedExercise.getSets()) {
+                sum += set.getExp();
+            }
         }
         return sum;
     }
