@@ -72,7 +72,8 @@
     <string name="workout_distance_short">M</string>
     <string name="workout_assistance_short">Assist</string>
     <string name="workout_add_set">Add set</string>
-    <string name="workout_save_set">Done</string>
+    <string name="workout_save_set">✓</string>
+    <string name="workout_complete_set">Complete set</string>
     <string name="workout_table_set">SET</string>
     <string name="workout_table_previous">PREVIOUS</string>
     <string name="workout_table_value">VALUE</string>

@@ -14,7 +14,7 @@
 
     <Spinner
         android:id="@+id/setTypeSpinner"
-        android:layout_width="92dp"
+        android:layout_width="112dp"
         android:layout_height="44dp" />
 
     <EditText
@@ -84,10 +84,15 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveSetButton"
-        android:layout_width="64dp"
+        android:layout_width="52dp"
         android:layout_height="44dp"
         android:layout_marginStart="8dp"
+        android:contentDescription="@string/workout_complete_set"
+        android:insetLeft="0dp"
+        android:insetRight="0dp"
+        android:minWidth="0dp"
         android:text="@string/workout_save_set"
         android:textAllCaps="false"
+        android:textSize="20sp"
         app:cornerRadius="8dp" />
 </LinearLayout>

@@ -181,12 +181,6 @@ public class WorkoutLoggerFragment extends Fragment {
             itemBinding.exerciseName.setText(loggedExercise.getExercise().getName());
             itemBinding.exerciseType.setText(pretty(loggedExercise.getExercise().getExerciseType().name()));
             renderSets(itemBinding, loggedExercise, true);
-            if (editingExerciseId == loggedExercise.getExercise().getId()) {
-                LoggedSet existingSet = editingSetIndex >= 0 && editingSetIndex < loggedExercise.getSets().size()
-                        ? loggedExercise.getSets().get(editingSetIndex)
-                        : null;
-                renderEditor(itemBinding, loggedExercise.getExercise(), existingSet);
-            }
             itemBinding.addSetButton.setOnClickListener(v -> {
                 editingExerciseId = loggedExercise.getExercise().getId();
                 editingSetIndex = -1;
@@ -201,9 +195,18 @@ public class WorkoutLoggerFragment extends Fragment {
 
     private void renderSets(ItemWorkoutExerciseBinding itemBinding, LoggedExercise loggedExercise, boolean interactive) {
         itemBinding.setContainer.removeAllViews();
+        itemBinding.editorContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         int index = 0;
         for (LoggedSet loggedSet : loggedExercise.getSets()) {
+            if (interactive
+                    && editingExerciseId == loggedExercise.getExercise().getId()
+                    && editingSetIndex == index) {
+                renderEditor(itemBinding.setContainer, loggedExercise.getExercise(), loggedSet);
+                index++;
+                continue;
+            }
+
             ItemLoggedSetBinding setBinding = ItemLoggedSetBinding.inflate(inflater, itemBinding.setContainer, false);
             setBinding.loggedSetTitle.setText(setLabel(loggedSet));
             setBinding.loggedSetDetails.setText(setDetails(loggedSet));
@@ -224,11 +227,15 @@ public class WorkoutLoggerFragment extends Fragment {
             itemBinding.setContainer.addView(setBinding.getRoot());
             index++;
         }
+        if (interactive
+                && editingExerciseId == loggedExercise.getExercise().getId()
+                && editingSetIndex == -1) {
+            renderEditor(itemBinding.setContainer, loggedExercise.getExercise(), null);
+        }
     }
 
-    private void renderEditor(ItemWorkoutExerciseBinding itemBinding, Exercise exercise, LoggedSet existingSet) {
-        itemBinding.editorContainer.removeAllViews();
-        ItemSetEditorBinding editorBinding = ItemSetEditorBinding.inflate(LayoutInflater.from(requireContext()), itemBinding.editorContainer, false);
+    private void renderEditor(ViewGroup parent, Exercise exercise, LoggedSet existingSet) {
+        ItemSetEditorBinding editorBinding = ItemSetEditorBinding.inflate(LayoutInflater.from(requireContext()), parent, false);
         setupSetTypeSpinner(editorBinding);
         configureEditorFields(editorBinding, exercise.getExerciseType());
         if (existingSet != null) {
@@ -269,7 +276,7 @@ public class WorkoutLoggerFragment extends Fragment {
                 );
             }
         });
-        itemBinding.editorContainer.addView(editorBinding.getRoot());
+        parent.addView(editorBinding.getRoot());
     }
 
     private void prefillEditor(ItemSetEditorBinding editorBinding, LoggedSet loggedSet) {
@@ -474,9 +481,9 @@ public class WorkoutLoggerFragment extends Fragment {
 
     private List<String> setTypeLabels() {
         List<String> labels = new ArrayList<>();
-        labels.add("Working set");
-        labels.add("Warmup");
-        labels.add("Failure");
+        labels.add("Set");
+        labels.add("Warm");
+        labels.add("Fail");
         labels.add("AMRAP");
         return labels;
     }
