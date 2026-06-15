@@ -31,6 +31,10 @@ public class WorkoutLogRepository {
         void onSaved(long sessionId, int sessionExp);
     }
 
+    public interface ExerciseSetsCallback {
+        void onLoaded(long exerciseId, List<WorkoutSet> sets);
+    }
+
     private final WorkoutSessionDao workoutSessionDao;
     private final WorkoutSetDao workoutSetDao;
     private final ExpEventDao expEventDao;
@@ -81,6 +85,15 @@ public class WorkoutLogRepository {
 
             if (callback != null) {
                 mainHandler.post(() -> callback.onSaved(sessionId, totalExp));
+            }
+        });
+    }
+
+    public void getCompletedSetsForExercise(long exerciseId, ExerciseSetsCallback callback) {
+        diskExecutor.execute(() -> {
+            List<WorkoutSet> sets = workoutSetDao.getCompletedSetsForExercise(exerciseId);
+            if (callback != null) {
+                mainHandler.post(() -> callback.onLoaded(exerciseId, sets));
             }
         });
     }

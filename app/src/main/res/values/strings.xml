@@ -66,7 +66,11 @@
     <string name="workout_duration_hint">Duration sec</string>
     <string name="workout_distance_hint">Distance m</string>
     <string name="workout_assistance_hint">Assistance kg</string>
-    <string name="workout_overload">Progressive overload</string>
+    <string name="workout_reps_short">Reps</string>
+    <string name="workout_weight_short">KG</string>
+    <string name="workout_duration_short">Sec</string>
+    <string name="workout_distance_short">M</string>
+    <string name="workout_assistance_short">Assist</string>
     <string name="workout_add_set">Add set</string>
     <string name="workout_save_set">Done</string>
     <string name="workout_table_set">SET</string>

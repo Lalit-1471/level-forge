@@ -16,6 +16,9 @@ public interface WorkoutSetDao {
     @Query("SELECT * FROM workout_sets WHERE sessionId = :sessionId ORDER BY setNumber")
     LiveData<List<WorkoutSet>> observeSetsForSession(long sessionId);
 
+    @Query("SELECT * FROM workout_sets WHERE exerciseId = :exerciseId AND completed = 1")
+    List<WorkoutSet> getCompletedSetsForExercise(long exerciseId);
+
     @Insert
     long insert(WorkoutSet workoutSet);
 

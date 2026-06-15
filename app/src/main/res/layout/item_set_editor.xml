@@ -4,72 +4,89 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
-    android:background="@color/slate_800"
-    android:orientation="vertical"
-    android:padding="12dp">
+    android:background="@drawable/bg_set_editor"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="10dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="8dp">
 
     <Spinner
         android:id="@+id/setTypeSpinner"
-        android:layout_width="match_parent"
+        android:layout_width="92dp"
         android:layout_height="44dp" />
 
     <EditText
-        android:id="@+id/repsInput"
-        android:layout_width="match_parent"
+        android:id="@+id/weightInput"
+        android:layout_width="0dp"
         android:layout_height="44dp"
-        android:hint="@string/workout_reps_hint"
-        android:inputType="number"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:hint="@string/workout_weight_short"
+        android:inputType="numberDecimal"
+        android:singleLine="true"
         android:textColor="@android:color/white"
         android:textColorHint="@color/slate_300" />
 
     <EditText
-        android:id="@+id/weightInput"
-        android:layout_width="match_parent"
+        android:id="@+id/repsInput"
+        android:layout_width="0dp"
         android:layout_height="44dp"
-        android:hint="@string/workout_weight_hint"
-        android:inputType="numberDecimal"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:hint="@string/workout_reps_short"
+        android:inputType="number"
+        android:singleLine="true"
         android:textColor="@android:color/white"
         android:textColorHint="@color/slate_300" />
 
     <EditText
         android:id="@+id/durationInput"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="44dp"
-        android:hint="@string/workout_duration_hint"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:hint="@string/workout_duration_short"
         android:inputType="number"
+        android:singleLine="true"
         android:textColor="@android:color/white"
         android:textColorHint="@color/slate_300" />
 
     <EditText
         android:id="@+id/distanceInput"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="44dp"
-        android:hint="@string/workout_distance_hint"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:hint="@string/workout_distance_short"
         android:inputType="numberDecimal"
+        android:singleLine="true"
         android:textColor="@android:color/white"
         android:textColorHint="@color/slate_300" />
 
     <EditText
         android:id="@+id/assistanceInput"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="44dp"
-        android:hint="@string/workout_assistance_hint"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:hint="@string/workout_assistance_short"
         android:inputType="numberDecimal"
+        android:singleLine="true"
         android:textColor="@android:color/white"
         android:textColorHint="@color/slate_300" />
 
-    <CheckBox
-        android:id="@+id/progressiveOverloadCheckBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/workout_overload"
-        android:textColor="@color/slate_200" />
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveSetButton"
-        android:layout_width="match_parent"
+        android:layout_width="64dp"
         android:layout_height="44dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginStart="8dp"
         android:text="@string/workout_save_set"
         android:textAllCaps="false"
         app:cornerRadius="8dp" />

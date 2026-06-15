@@ -235,32 +235,39 @@ public class WorkoutLoggerFragment extends Fragment {
             prefillEditor(editorBinding, existingSet);
         }
         editorBinding.saveSetButton.setOnClickListener(v -> {
-            if (editingSetIndex >= 0) {
+            int setIndex = editingSetIndex;
+            SetType setType = selectedSetType(editorBinding);
+            int reps = optionalInt(editorBinding.repsInput);
+            double weightKg = optionalDouble(editorBinding.weightInput);
+            int durationSeconds = optionalInt(editorBinding.durationInput);
+            double distanceMeters = optionalDouble(editorBinding.distanceInput);
+            double assistanceKg = optionalDouble(editorBinding.assistanceInput);
+
+            editingExerciseId = -1L;
+            editingSetIndex = -1;
+
+            if (setIndex >= 0) {
                 viewModel.replaceSet(
                         exercise.getId(),
-                        editingSetIndex,
-                        selectedSetType(editorBinding),
-                        optionalInt(editorBinding.repsInput),
-                        optionalDouble(editorBinding.weightInput),
-                        optionalInt(editorBinding.durationInput),
-                        optionalDouble(editorBinding.distanceInput),
-                        optionalDouble(editorBinding.assistanceInput),
-                        editorBinding.progressiveOverloadCheckBox.isChecked()
+                        setIndex,
+                        setType,
+                        reps,
+                        weightKg,
+                        durationSeconds,
+                        distanceMeters,
+                        assistanceKg
                 );
             } else {
                 viewModel.addSet(
                         exercise.getId(),
-                        selectedSetType(editorBinding),
-                        optionalInt(editorBinding.repsInput),
-                        optionalDouble(editorBinding.weightInput),
-                        optionalInt(editorBinding.durationInput),
-                        optionalDouble(editorBinding.distanceInput),
-                        optionalDouble(editorBinding.assistanceInput),
-                        editorBinding.progressiveOverloadCheckBox.isChecked()
+                        setType,
+                        reps,
+                        weightKg,
+                        durationSeconds,
+                        distanceMeters,
+                        assistanceKg
                 );
             }
-            editingExerciseId = -1L;
-            editingSetIndex = -1;
         });
         itemBinding.editorContainer.addView(editorBinding.getRoot());
     }
@@ -414,11 +421,17 @@ public class WorkoutLoggerFragment extends Fragment {
 
     private String setDetails(LoggedSet loggedSet) {
         List<String> parts = new ArrayList<>();
-        if (loggedSet.getWorkoutSet().getReps() > 0) {
-            parts.add(loggedSet.getWorkoutSet().getReps() + " reps");
-        }
-        if (loggedSet.getWorkoutSet().getWeightKg() > 0) {
-            parts.add(format(loggedSet.getWorkoutSet().getWeightKg()) + " kg");
+        int reps = loggedSet.getWorkoutSet().getReps();
+        double weightKg = loggedSet.getWorkoutSet().getWeightKg();
+        if (weightKg > 0 && reps > 0) {
+            parts.add(format(weightKg) + " kg x " + reps);
+        } else {
+            if (weightKg > 0) {
+                parts.add(format(weightKg) + " kg");
+            }
+            if (reps > 0) {
+                parts.add(reps + " reps");
+            }
         }
         if (loggedSet.getWorkoutSet().getDurationSeconds() > 0) {
             parts.add(loggedSet.getWorkoutSet().getDurationSeconds() + " sec");
