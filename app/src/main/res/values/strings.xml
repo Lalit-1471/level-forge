@@ -13,6 +13,7 @@
     <string name="dashboard_log_workout">Start a Workout</string>
     <string name="dashboard_exercise_library">Exercise library</string>
     <string name="tab_home">Home</string>
+    <string name="tab_stats">Stats</string>
     <string name="tab_profile">Profile</string>
     <string name="onboarding_title">Awakening Setup</string>
     <string name="onboarding_subtitle">Create your hunter profile and get a one-time nutrition target.</string>
@@ -102,4 +103,19 @@
     <string name="profile_workout_detail_summary">%1$d sets • %2$s volume • %3$d saved EXP</string>
     <string name="profile_detail_set_exp">%1$d EXP</string>
     <string name="profile_detail_exp_breakdown">Base %1$d • Effort +%2$d • Set type %3$+d</string>
+    <string name="stats_title">Stats</string>
+    <string name="stats_subtitle">Training trends, best efforts, and workout momentum.</string>
+    <string name="stats_metric_workouts">Workouts</string>
+    <string name="stats_metric_sets">Sets logged</string>
+    <string name="stats_metric_volume">Total volume</string>
+    <string name="stats_metric_exp">EXP earned</string>
+    <string name="stats_volume_chart">Volume trend</string>
+    <string name="stats_exp_chart">EXP per workout</string>
+    <string name="stats_chart_empty">Log workouts to unlock this chart</string>
+    <string name="stats_insights">Insights</string>
+    <string name="stats_favorite_exercise">Favorite exercise</string>
+    <string name="stats_top_muscle">Most trained muscle</string>
+    <string name="stats_best_effort">Best effort</string>
+    <string name="stats_best_session">Highest EXP workout</string>
+    <string name="stats_empty_value">No data yet</string>
 </resources>

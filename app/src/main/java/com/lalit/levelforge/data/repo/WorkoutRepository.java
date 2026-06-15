@@ -48,6 +48,10 @@ public class WorkoutRepository {
         return workoutSetDao.observeSetDetailsForSession(sessionId);
     }
 
+    public LiveData<List<WorkoutSetWithExercise>> observeCompletedSetDetails() {
+        return workoutSetDao.observeCompletedSetDetails();
+    }
+
     public void saveSession(WorkoutSession workoutSession) {
         diskExecutor.execute(() -> workoutSessionDao.upsert(workoutSession));
     }

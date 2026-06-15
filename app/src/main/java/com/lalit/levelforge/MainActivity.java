@@ -35,7 +35,9 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
             int destinationId = destination.getId();
-            boolean showTabs = destinationId == R.id.homeFragment || destinationId == R.id.profileFragment;
+            boolean showTabs = destinationId == R.id.homeFragment
+                    || destinationId == R.id.statsFragment
+                    || destinationId == R.id.profileFragment;
             binding.bottomNavigation.setVisibility(showTabs ? View.VISIBLE : View.GONE);
         });
     }
