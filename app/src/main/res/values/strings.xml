@@ -48,9 +48,16 @@
     <string name="workout_logger_title">Workout</string>
     <string name="workout_logger_subtitle">Add exercises, complete sets, then finish and review.</string>
     <string name="workout_timer_label">Timer</string>
+    <string name="workout_duration_label">Duration</string>
+    <string name="workout_volume_label">Volume</string>
+    <string name="workout_sets_label">Sets</string>
+    <string name="workout_exp_label">EXP</string>
+    <string name="workout_get_started">Get started</string>
+    <string name="workout_get_started_subtitle">Add an exercise to start your workout</string>
     <string name="workout_add_exercise">+ Add Exercise</string>
     <string name="workout_add_exercise_title">Add Exercise</string>
     <string name="workout_cancel">Cancel</string>
+    <string name="workout_search_exercise">Search exercise</string>
     <string name="workout_muscle_filter_label">Primary muscle</string>
     <string name="workout_exercise_label">Exercise</string>
     <string name="workout_set_type_label">Set type</string>
@@ -62,6 +69,10 @@
     <string name="workout_overload">Progressive overload</string>
     <string name="workout_add_set">Add set</string>
     <string name="workout_save_set">Done</string>
+    <string name="workout_table_set">SET</string>
+    <string name="workout_table_previous">PREVIOUS</string>
+    <string name="workout_table_value">VALUE</string>
+    <string name="workout_table_reps">REPS</string>
     <string name="workout_finish">Finish workout</string>
     <string name="workout_review_title">Workout review</string>
     <string name="workout_review_summary">%1$d exercises • %2$d sets • %3$d preview EXP • %4$s elapsed</string>

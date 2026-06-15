@@ -101,6 +101,39 @@ public class WorkoutLoggerViewModel extends ViewModel {
         totalExp.setValue(sumExp(updatedExercises));
     }
 
+    public void replaceSet(long exerciseId, int setIndex, SetType setType, int reps, double weightKg,
+                           int durationSeconds, double distanceMeters, double assistanceKg,
+                           boolean progressiveOverload) {
+        List<LoggedExercise> updatedExercises = new ArrayList<>();
+        for (LoggedExercise loggedExercise : safeLoggedExercises()) {
+            if (loggedExercise.getExercise().getId() != exerciseId) {
+                updatedExercises.add(loggedExercise);
+                continue;
+            }
+
+            List<LoggedSet> updatedSets = new ArrayList<>(loggedExercise.getSets());
+            if (setIndex < 0 || setIndex >= updatedSets.size()) {
+                updatedExercises.add(loggedExercise);
+                continue;
+            }
+
+            WorkoutSet workoutSet = updatedSets.get(setIndex).getWorkoutSet();
+            workoutSet.setSetType(setType);
+            workoutSet.setReps(reps);
+            workoutSet.setWeightKg(weightKg);
+            workoutSet.setDurationSeconds(durationSeconds);
+            workoutSet.setDistanceMeters(distanceMeters);
+            workoutSet.setAssistanceKg(assistanceKg);
+            workoutSet.setCompleted(true);
+
+            int exp = ExpCalculator.expForSet(loggedExercise.getExercise(), workoutSet, progressiveOverload);
+            updatedSets.set(setIndex, new LoggedSet(loggedExercise.getExercise(), workoutSet, exp));
+            updatedExercises.add(new LoggedExercise(loggedExercise.getExercise(), updatedSets));
+        }
+        loggedExercises.setValue(Collections.unmodifiableList(updatedExercises));
+        totalExp.setValue(sumExp(updatedExercises));
+    }
+
     public void removeSet(long exerciseId, int setIndex) {
         List<LoggedExercise> updatedExercises = new ArrayList<>();
         for (LoggedExercise loggedExercise : safeLoggedExercises()) {

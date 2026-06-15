@@ -66,24 +66,145 @@
                 android:textColor="@color/slate_200"
                 android:textSize="15sp" />
 
-            <TextView
-                android:id="@+id/previewExpValue"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:textColor="@color/orange_400"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_marginTop="18dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/emptyWorkoutText"
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/workout_duration_label"
+                        android:textColor="@color/slate_300"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/durationStatValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/teal_300"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/workout_volume_label"
+                        android:textColor="@color/slate_300"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/volumeStatValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/workout_sets_label"
+                        android:textColor="@color/slate_300"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/setsStatValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/workout_exp_label"
+                        android:textColor="@color/slate_300"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/previewExpValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/orange_400"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="@color/slate_800" />
+
+            <LinearLayout
+                android:id="@+id/emptyWorkoutState"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="72dp"
                 android:gravity="center"
-                android:text="@string/workout_empty_sets"
-                android:textColor="@color/slate_300"
-                android:textSize="16sp" />
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="58dp"
+                    android:layout_height="58dp"
+                    android:src="@drawable/ic_dumbbell" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center"
+                    android:text="@string/workout_get_started"
+                    android:textColor="@android:color/white"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/emptyWorkoutText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="@string/workout_get_started_subtitle"
+                    android:textColor="@color/slate_300"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/exerciseContainer"
@@ -100,6 +221,18 @@
                 android:text="@string/workout_add_exercise"
                 android:textAllCaps="false"
                 app:cornerRadius="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/discardWorkoutButtonInline"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/workout_discard"
+                android:textAllCaps="false"
+                android:textColor="@color/slate_200"
+                app:cornerRadius="8dp"
+                app:strokeColor="@color/slate_700" />
         </LinearLayout>
     </ScrollView>
 
@@ -147,6 +280,19 @@
                 android:layout_marginTop="20dp"
                 android:text="@string/workout_muscle_filter_label"
                 android:textColor="@color/slate_300" />
+
+            <EditText
+                android:id="@+id/exerciseSearchInput"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_search_field"
+                android:hint="@string/workout_search_exercise"
+                android:inputType="textCapWords"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="@color/slate_300" />
 
             <Spinner
                 android:id="@+id/muscleFilterSpinner"

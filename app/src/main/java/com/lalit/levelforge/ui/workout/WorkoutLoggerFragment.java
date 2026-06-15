@@ -3,6 +3,8 @@ package com.lalit.levelforge.ui.workout;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +24,7 @@ import com.lalit.levelforge.data.model.ExerciseType;
 import com.lalit.levelforge.data.model.MuscleGroup;
 import com.lalit.levelforge.data.model.SetType;
 import com.lalit.levelforge.databinding.FragmentWorkoutLoggerBinding;
-import com.lalit.levelforge.databinding.ItemExerciseBinding;
+import com.lalit.levelforge.databinding.ItemExercisePickerBinding;
 import com.lalit.levelforge.databinding.ItemLoggedSetBinding;
 import com.lalit.levelforge.databinding.ItemSetEditorBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutExerciseBinding;
@@ -43,7 +45,9 @@ public class WorkoutLoggerFragment extends Fragment {
     private final List<Exercise> visibleExercises = new ArrayList<>();
     private List<LoggedExercise> latestLoggedExercises = new ArrayList<>();
     private long editingExerciseId = -1L;
+    private int editingSetIndex = -1;
     private int lastTotalExp;
+    private String exerciseSearchQuery = "";
 
     private final Runnable timerRunnable = new Runnable() {
         @Override
@@ -90,7 +94,26 @@ public class WorkoutLoggerFragment extends Fragment {
 
         binding.addExerciseButton.setOnClickListener(v -> showPicker());
         binding.cancelPickerButton.setOnClickListener(v -> showWorkout());
+        binding.discardWorkoutButtonInline.setOnClickListener(v -> {
+            viewModel.discardWorkout();
+            Navigation.findNavController(v).popBackStack();
+        });
         binding.muscleFilterSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener(this::filterExercises));
+        binding.exerciseSearchInput.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                exerciseSearchQuery = s == null ? "" : s.toString().trim().toLowerCase(Locale.US);
+                filterExercises();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
         binding.finishWorkoutButton.setOnClickListener(v -> finishWorkout());
         binding.postWorkoutButton.setOnClickListener(v -> viewModel.postWorkout("Workout", elapsedSeconds()));
         binding.discardWorkoutButton.setOnClickListener(v -> {
@@ -122,7 +145,10 @@ public class WorkoutLoggerFragment extends Fragment {
         MuscleGroup selectedMuscle = selectedFilter <= 0 ? null : MuscleGroup.values()[selectedFilter - 1];
 
         for (Exercise exercise : allExercises) {
-            if (selectedMuscle == null || exercise.getPrimaryMuscleGroup() == selectedMuscle) {
+            boolean muscleMatches = selectedMuscle == null || exercise.getPrimaryMuscleGroup() == selectedMuscle;
+            boolean queryMatches = exerciseSearchQuery.isEmpty()
+                    || exercise.getName().toLowerCase(Locale.US).contains(exerciseSearchQuery);
+            if (muscleMatches && queryMatches) {
                 visibleExercises.add(exercise);
             }
         }
@@ -130,9 +156,9 @@ public class WorkoutLoggerFragment extends Fragment {
         binding.exercisePickerContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         for (Exercise exercise : visibleExercises) {
-            ItemExerciseBinding itemBinding = ItemExerciseBinding.inflate(inflater, binding.exercisePickerContainer, false);
+            ItemExercisePickerBinding itemBinding = ItemExercisePickerBinding.inflate(inflater, binding.exercisePickerContainer, false);
+            itemBinding.exerciseBadge.setText(badgeFor(exercise));
             itemBinding.exerciseName.setText(exercise.getName());
-            itemBinding.exerciseType.setText(pretty(exercise.getExerciseType().name()));
             itemBinding.exerciseMuscles.setText(primaryAndSecondary(exercise));
             itemBinding.exerciseExp.setText(exercise.getBaseExp() + " base EXP");
             itemBinding.getRoot().setOnClickListener(v -> {
@@ -146,7 +172,7 @@ public class WorkoutLoggerFragment extends Fragment {
 
     private void renderWorkout(List<LoggedExercise> loggedExercises) {
         latestLoggedExercises = loggedExercises == null ? new ArrayList<>() : new ArrayList<>(loggedExercises);
-        binding.emptyWorkoutText.setVisibility(latestLoggedExercises.isEmpty() ? View.VISIBLE : View.GONE);
+        binding.emptyWorkoutState.setVisibility(latestLoggedExercises.isEmpty() ? View.VISIBLE : View.GONE);
         binding.exerciseContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(requireContext());
 
@@ -154,58 +180,107 @@ public class WorkoutLoggerFragment extends Fragment {
             ItemWorkoutExerciseBinding itemBinding = ItemWorkoutExerciseBinding.inflate(inflater, binding.exerciseContainer, false);
             itemBinding.exerciseName.setText(loggedExercise.getExercise().getName());
             itemBinding.exerciseType.setText(pretty(loggedExercise.getExercise().getExerciseType().name()));
-            renderSets(itemBinding, loggedExercise);
+            renderSets(itemBinding, loggedExercise, true);
             if (editingExerciseId == loggedExercise.getExercise().getId()) {
-                renderEditor(itemBinding, loggedExercise.getExercise());
+                LoggedSet existingSet = editingSetIndex >= 0 && editingSetIndex < loggedExercise.getSets().size()
+                        ? loggedExercise.getSets().get(editingSetIndex)
+                        : null;
+                renderEditor(itemBinding, loggedExercise.getExercise(), existingSet);
             }
             itemBinding.addSetButton.setOnClickListener(v -> {
                 editingExerciseId = loggedExercise.getExercise().getId();
+                editingSetIndex = -1;
                 renderWorkout(latestLoggedExercises);
             });
             binding.exerciseContainer.addView(itemBinding.getRoot());
         }
         renderReviewExercises();
+        updateStats();
         updateReviewSummary();
     }
 
-    private void renderSets(ItemWorkoutExerciseBinding itemBinding, LoggedExercise loggedExercise) {
+    private void renderSets(ItemWorkoutExerciseBinding itemBinding, LoggedExercise loggedExercise, boolean interactive) {
         itemBinding.setContainer.removeAllViews();
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         int index = 0;
         for (LoggedSet loggedSet : loggedExercise.getSets()) {
             ItemLoggedSetBinding setBinding = ItemLoggedSetBinding.inflate(inflater, itemBinding.setContainer, false);
-            setBinding.loggedSetTitle.setText("Set " + loggedSet.getWorkoutSet().getSetNumber());
+            setBinding.loggedSetTitle.setText(setLabel(loggedSet));
             setBinding.loggedSetDetails.setText(setDetails(loggedSet));
-            setBinding.loggedSetExp.setText(loggedSet.getExp() + " EXP");
+            setBinding.loggedSetExp.setText("✓ " + loggedSet.getExp() + " EXP");
             int setIndex = index;
-            setBinding.getRoot().setOnClickListener(v -> {
-                viewModel.removeSet(loggedExercise.getExercise().getId(), setIndex);
-                Toast.makeText(requireContext(), "Set removed", Toast.LENGTH_SHORT).show();
-            });
+            if (interactive) {
+                setBinding.getRoot().setOnClickListener(v -> {
+                    editingExerciseId = loggedExercise.getExercise().getId();
+                    editingSetIndex = setIndex;
+                    renderWorkout(latestLoggedExercises);
+                });
+                setBinding.getRoot().setOnLongClickListener(v -> {
+                    viewModel.removeSet(loggedExercise.getExercise().getId(), setIndex);
+                    Toast.makeText(requireContext(), "Set removed", Toast.LENGTH_SHORT).show();
+                    return true;
+                });
+            }
             itemBinding.setContainer.addView(setBinding.getRoot());
             index++;
         }
     }
 
-    private void renderEditor(ItemWorkoutExerciseBinding itemBinding, Exercise exercise) {
+    private void renderEditor(ItemWorkoutExerciseBinding itemBinding, Exercise exercise, LoggedSet existingSet) {
         itemBinding.editorContainer.removeAllViews();
         ItemSetEditorBinding editorBinding = ItemSetEditorBinding.inflate(LayoutInflater.from(requireContext()), itemBinding.editorContainer, false);
         setupSetTypeSpinner(editorBinding);
         configureEditorFields(editorBinding, exercise.getExerciseType());
+        if (existingSet != null) {
+            prefillEditor(editorBinding, existingSet);
+        }
         editorBinding.saveSetButton.setOnClickListener(v -> {
-            viewModel.addSet(
-                    exercise.getId(),
-                    selectedSetType(editorBinding),
-                    optionalInt(editorBinding.repsInput),
-                    optionalDouble(editorBinding.weightInput),
-                    optionalInt(editorBinding.durationInput),
-                    optionalDouble(editorBinding.distanceInput),
-                    optionalDouble(editorBinding.assistanceInput),
-                    editorBinding.progressiveOverloadCheckBox.isChecked()
-            );
+            if (editingSetIndex >= 0) {
+                viewModel.replaceSet(
+                        exercise.getId(),
+                        editingSetIndex,
+                        selectedSetType(editorBinding),
+                        optionalInt(editorBinding.repsInput),
+                        optionalDouble(editorBinding.weightInput),
+                        optionalInt(editorBinding.durationInput),
+                        optionalDouble(editorBinding.distanceInput),
+                        optionalDouble(editorBinding.assistanceInput),
+                        editorBinding.progressiveOverloadCheckBox.isChecked()
+                );
+            } else {
+                viewModel.addSet(
+                        exercise.getId(),
+                        selectedSetType(editorBinding),
+                        optionalInt(editorBinding.repsInput),
+                        optionalDouble(editorBinding.weightInput),
+                        optionalInt(editorBinding.durationInput),
+                        optionalDouble(editorBinding.distanceInput),
+                        optionalDouble(editorBinding.assistanceInput),
+                        editorBinding.progressiveOverloadCheckBox.isChecked()
+                );
+            }
             editingExerciseId = -1L;
+            editingSetIndex = -1;
         });
         itemBinding.editorContainer.addView(editorBinding.getRoot());
+    }
+
+    private void prefillEditor(ItemSetEditorBinding editorBinding, LoggedSet loggedSet) {
+        SetType setType = loggedSet.getWorkoutSet().getSetType();
+        if (setType == SetType.WARMUP) {
+            editorBinding.setTypeSpinner.setSelection(1);
+        } else if (setType == SetType.FAILURE) {
+            editorBinding.setTypeSpinner.setSelection(2);
+        } else if (setType == SetType.AMRAP) {
+            editorBinding.setTypeSpinner.setSelection(3);
+        } else {
+            editorBinding.setTypeSpinner.setSelection(0);
+        }
+        setTextIfPositive(editorBinding.repsInput, loggedSet.getWorkoutSet().getReps());
+        setTextIfPositive(editorBinding.weightInput, loggedSet.getWorkoutSet().getWeightKg());
+        setTextIfPositive(editorBinding.durationInput, loggedSet.getWorkoutSet().getDurationSeconds());
+        setTextIfPositive(editorBinding.distanceInput, loggedSet.getWorkoutSet().getDistanceMeters());
+        setTextIfPositive(editorBinding.assistanceInput, loggedSet.getWorkoutSet().getAssistanceKg());
     }
 
     private void setupSetTypeSpinner(ItemSetEditorBinding editorBinding) {
@@ -248,7 +323,7 @@ public class WorkoutLoggerFragment extends Fragment {
             itemBinding.exerciseName.setText(loggedExercise.getExercise().getName());
             itemBinding.exerciseType.setText(pretty(loggedExercise.getExercise().getExerciseType().name()));
             itemBinding.addSetButton.setVisibility(View.GONE);
-            renderSets(itemBinding, loggedExercise);
+            renderSets(itemBinding, loggedExercise, false);
             binding.reviewExerciseContainer.addView(itemBinding.getRoot());
         }
     }
@@ -286,7 +361,17 @@ public class WorkoutLoggerFragment extends Fragment {
             return;
         }
         binding.timerValue.setText(formatElapsed(elapsedSeconds()));
+        updateStats();
         updateReviewSummary();
+    }
+
+    private void updateStats() {
+        if (binding == null) {
+            return;
+        }
+        binding.durationStatValue.setText(formatElapsed(elapsedSeconds()));
+        binding.volumeStatValue.setText(formatVolume(totalVolumeKg()));
+        binding.setsStatValue.setText(String.valueOf(viewModel.setCount()));
     }
 
     private void updateReviewSummary() {
@@ -309,6 +394,22 @@ public class WorkoutLoggerFragment extends Fragment {
             return primary;
         }
         return primary + " + " + pretty(secondary);
+    }
+
+    private String badgeFor(Exercise exercise) {
+        String primary = exercise.getPrimaryMuscleGroup().name();
+        return primary.substring(0, 1);
+    }
+
+    private String setLabel(LoggedSet loggedSet) {
+        SetType setType = loggedSet.getWorkoutSet().getSetType();
+        if (setType == SetType.WARMUP) {
+            return "W";
+        }
+        if (setType == SetType.FAILURE) {
+            return "F";
+        }
+        return String.valueOf(loggedSet.getWorkoutSet().getSetNumber());
     }
 
     private String setDetails(LoggedSet loggedSet) {
@@ -383,8 +484,30 @@ public class WorkoutLoggerFragment extends Fragment {
         return value.isEmpty() ? 0 : Double.parseDouble(value);
     }
 
+    private void setTextIfPositive(EditText editText, int value) {
+        if (value > 0) {
+            editText.setText(String.valueOf(value));
+        }
+    }
+
+    private void setTextIfPositive(EditText editText, double value) {
+        if (value > 0) {
+            editText.setText(format(value));
+        }
+    }
+
     private int elapsedSeconds() {
         return (int) ((System.currentTimeMillis() - viewModel.getStartedAtMillis()) / 1000L);
+    }
+
+    private double totalVolumeKg() {
+        double volume = 0;
+        for (LoggedExercise loggedExercise : latestLoggedExercises) {
+            for (LoggedSet loggedSet : loggedExercise.getSets()) {
+                volume += loggedSet.getWorkoutSet().getWeightKg() * Math.max(1, loggedSet.getWorkoutSet().getReps());
+            }
+        }
+        return volume;
     }
 
     private String formatElapsed(int seconds) {
@@ -414,6 +537,13 @@ public class WorkoutLoggerFragment extends Fragment {
             return String.valueOf((int) value);
         }
         return String.format(Locale.US, "%.1f", value);
+    }
+
+    private String formatVolume(double value) {
+        if (value <= 0) {
+            return "0 kg";
+        }
+        return format(value) + " kg";
     }
 
     @Override
