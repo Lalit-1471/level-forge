@@ -11,19 +11,30 @@ public final class ExpCalculator {
     }
 
     public static int expForSet(Exercise exercise, WorkoutSet workoutSet, boolean progressiveOverload) {
+        return breakdownForSet(exercise, workoutSet, progressiveOverload).getTotalExp();
+    }
+
+    public static ExpBreakdown breakdownForSet(Exercise exercise, WorkoutSet workoutSet, boolean progressiveOverload) {
         if (exercise == null || workoutSet == null || !workoutSet.isCompleted()) {
-            return 0;
+            return new ExpBreakdown(0, 0, 0, 0, 0);
         }
 
-        double exp = Math.max(1, exercise.getBaseExp());
-        exp += volumeBonus(exercise.getExerciseType(), workoutSet);
-        exp *= setTypeMultiplier(workoutSet.getSetType());
+        double baseExp = Math.max(1, exercise.getBaseExp());
+        double effortExp = volumeBonus(exercise.getExerciseType(), workoutSet);
+        double subtotal = baseExp + effortExp;
+        double setTypeBonus = subtotal * setTypeMultiplier(workoutSet.getSetType()) - subtotal;
+        double overloadBonus = 0;
 
         if (progressiveOverload) {
-            exp *= 1.20;
+            overloadBonus = (subtotal + setTypeBonus) * 0.20;
         }
 
-        return Math.max(1, (int) Math.round(exp));
+        int roundedBase = Math.max(1, (int) Math.round(baseExp));
+        int roundedEffort = Math.max(0, (int) Math.round(effortExp));
+        int roundedSetType = (int) Math.round(setTypeBonus);
+        int roundedOverload = Math.max(0, (int) Math.round(overloadBonus));
+        int totalExp = Math.max(1, (int) Math.round(baseExp + effortExp + setTypeBonus + overloadBonus));
+        return new ExpBreakdown(roundedBase, roundedEffort, roundedSetType, roundedOverload, totalExp);
     }
 
     private static double volumeBonus(ExerciseType exerciseType, WorkoutSet workoutSet) {

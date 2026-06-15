@@ -6,6 +6,7 @@ import com.lalit.levelforge.data.local.dao.WorkoutSetDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSessionDao;
 import com.lalit.levelforge.data.local.entity.WorkoutSet;
 import com.lalit.levelforge.data.local.entity.WorkoutSession;
+import com.lalit.levelforge.data.local.relation.WorkoutSetWithExercise;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -41,6 +42,10 @@ public class WorkoutRepository {
 
     public LiveData<List<WorkoutSet>> observeSetsForSession(long sessionId) {
         return workoutSetDao.observeSetsForSession(sessionId);
+    }
+
+    public LiveData<List<WorkoutSetWithExercise>> observeSetDetailsForSession(long sessionId) {
+        return workoutSetDao.observeSetDetailsForSession(sessionId);
     }
 
     public void saveSession(WorkoutSession workoutSession) {

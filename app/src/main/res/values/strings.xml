@@ -96,4 +96,10 @@
     <string name="profile_empty_workouts">No posted workouts yet. Finish and post a workout to see it here.</string>
     <string name="profile_workout_meta">%1$s • %2$s</string>
     <string name="profile_workout_exp">%1$d EXP</string>
+    <string name="profile_player_level">Level %1$d Hunter</string>
+    <string name="profile_player_exp">%1$d / %2$d EXP to next level • %3$d total EXP</string>
+    <string name="profile_workout_detail_loading">Loading workout details...</string>
+    <string name="profile_workout_detail_summary">%1$d sets • %2$s volume • %3$d saved EXP</string>
+    <string name="profile_detail_set_exp">%1$d EXP</string>
+    <string name="profile_detail_exp_breakdown">Base %1$d • Effort +%2$d • Set type %3$+d</string>
 </resources>
