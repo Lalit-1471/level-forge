@@ -84,6 +84,11 @@ public class WorkoutLoggerFragment extends Fragment {
                 showReview();
             }
         });
+        viewModel.getHiddenQuest().observe(getViewLifecycleOwner(), hiddenQuest -> {
+            boolean showHiddenQuest = hiddenQuest != null && !hiddenQuest.trim().isEmpty();
+            binding.hiddenQuestCard.setVisibility(showHiddenQuest ? View.VISIBLE : View.GONE);
+            binding.hiddenQuestText.setText(showHiddenQuest ? hiddenQuest : "");
+        });
         viewModel.getSaved().observe(getViewLifecycleOwner(), saved -> {
             if (saved != null && saved) {
                 Toast.makeText(requireContext(), R.string.workout_saved, Toast.LENGTH_SHORT).show();

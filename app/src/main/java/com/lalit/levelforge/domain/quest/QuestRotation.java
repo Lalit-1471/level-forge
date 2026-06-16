@@ -30,7 +30,8 @@ public final class QuestRotation {
                 dailyDefinitions,
                 dayStartMillis,
                 DAILY_VISIBLE_COUNT - visibleDefinitions.size(),
-                1
+                1,
+                DAILY_VISIBLE_COUNT - visibleDefinitions.size()
         ));
         return visibleDefinitions;
     }
@@ -41,7 +42,8 @@ public final class QuestRotation {
                 definitionsFor(definitions, QuestResetType.WEEKLY),
                 weekStartMillis,
                 WEEKLY_VISIBLE_COUNT,
-                7
+                7,
+                WEEKLY_VISIBLE_COUNT
         );
     }
 
@@ -72,7 +74,8 @@ public final class QuestRotation {
     private static List<QuestDefinition> rotatingSlice(List<QuestDefinition> definitions,
                                                        long periodStartMillis,
                                                        int count,
-                                                       int periodDays) {
+                                                       int periodDays,
+                                                       int rotationStride) {
         List<QuestDefinition> selected = new ArrayList<>();
         if (definitions.isEmpty() || count <= 0) {
             return selected;
@@ -80,7 +83,7 @@ public final class QuestRotation {
 
         int safeCount = Math.min(count, definitions.size());
         long periodIndex = TimeUnit.MILLISECONDS.toDays(periodStartMillis) / Math.max(1, periodDays);
-        int offset = (int) Math.floorMod(periodIndex, definitions.size());
+        int offset = (int) Math.floorMod(periodIndex * Math.max(1, rotationStride), definitions.size());
         for (int index = 0; index < safeCount; index++) {
             selected.add(definitions.get((offset + index) % definitions.size()));
         }

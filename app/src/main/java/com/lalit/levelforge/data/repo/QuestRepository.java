@@ -333,6 +333,32 @@ public class QuestRepository {
                 105
         ));
         definitions.add(new QuestDefinition(
+                "weekly_no_pr_required",
+                "Discipline over ego",
+                "Complete eighteen sets this week. No PR is required for this reward.",
+                QuestRarity.COMMON,
+                QuestResetType.WEEKLY,
+                QuestMetricType.SETS_COMPLETED,
+                18,
+                QuestRewardType.EXP,
+                190,
+                true,
+                106
+        ));
+        definitions.add(new QuestDefinition(
+                "weekly_recovery_block",
+                "Recovery contract",
+                "Log eight light, cardio, core, or mobility-friendly sets this week.",
+                QuestRarity.RARE,
+                QuestResetType.WEEKLY,
+                QuestMetricType.SETS_COMPLETED,
+                8,
+                QuestRewardType.EXP,
+                210,
+                true,
+                107
+        ));
+        definitions.add(new QuestDefinition(
                 "weekly_thirty_sets",
                 "High-volume raid",
                 "Complete thirty sets this week.",

@@ -172,6 +172,27 @@
                 android:layout_marginTop="20dp"
                 android:background="@color/slate_800" />
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/hiddenQuestCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/slate_900"
+                app:cardCornerRadius="8dp"
+                app:strokeColor="@color/quest_rare"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/hiddenQuestText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/quest_rare"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </com.google.android.material.card.MaterialCardView>
+
             <LinearLayout
                 android:id="@+id/emptyWorkoutState"
                 android:layout_width="match_parent"

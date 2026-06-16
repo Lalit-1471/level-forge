@@ -32,6 +32,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
     private final MutableLiveData<Integer> totalExp = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> reviewMode = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> saved = new MutableLiveData<>(false);
+    private final MutableLiveData<String> hiddenQuest = new MutableLiveData<>();
     private final Map<Long, Double> historicalBestEffortByExercise = new HashMap<>();
     private final Map<Long, Double> historicalBestWeightByExercise = new HashMap<>();
     private final Map<Long, Double> historicalBestVolumeByExercise = new HashMap<>();
@@ -64,6 +65,10 @@ public class WorkoutLoggerViewModel extends ViewModel {
 
     public LiveData<Boolean> getReviewMode() {
         return reviewMode;
+    }
+
+    public LiveData<String> getHiddenQuest() {
+        return hiddenQuest;
     }
 
     public long getStartedAtMillis() {
@@ -107,6 +112,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
         }
         loggedExercises.setValue(Collections.unmodifiableList(updatedExercises));
         totalExp.setValue(sumExp(updatedExercises));
+        evaluateHiddenQuest(updatedExercises);
     }
 
     public void replaceSet(long exerciseId, int setIndex, SetType setType, int reps, double weightKg,
@@ -141,6 +147,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
         }
         loggedExercises.setValue(Collections.unmodifiableList(updatedExercises));
         totalExp.setValue(sumExp(updatedExercises));
+        evaluateHiddenQuest(updatedExercises);
     }
 
     public void removeSet(long exerciseId, int setIndex) {
@@ -161,6 +168,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
         }
         loggedExercises.setValue(Collections.unmodifiableList(updatedExercises));
         totalExp.setValue(sumExp(updatedExercises));
+        evaluateHiddenQuest(updatedExercises);
     }
 
     public void finishWorkout() {
@@ -194,6 +202,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
         loggedExercises.setValue(Collections.emptyList());
         totalExp.setValue(0);
         reviewMode.setValue(false);
+        hiddenQuest.setValue(null);
     }
 
     public void consumeSaved() {
@@ -328,7 +337,40 @@ public class WorkoutLoggerViewModel extends ViewModel {
             List<LoggedExercise> rebuiltExercises = rebuildExerciseExp(safeLoggedExercises());
             loggedExercises.setValue(rebuiltExercises);
             totalExp.setValue(sumExp(rebuiltExercises));
+            evaluateHiddenQuest(rebuiltExercises);
         });
+    }
+
+    private void evaluateHiddenQuest(List<LoggedExercise> exercises) {
+        if (hiddenQuest.getValue() != null) {
+            return;
+        }
+        int sets = 0;
+        int overloads = 0;
+        double volume = 0;
+        boolean hasDurationWork = false;
+        for (LoggedExercise loggedExercise : exercises) {
+            for (LoggedSet loggedSet : loggedExercise.getSets()) {
+                WorkoutSet set = loggedSet.getWorkoutSet();
+                sets++;
+                if (set.isProgressiveOverload()) {
+                    overloads++;
+                }
+                volume += setVolume(set);
+                if (set.getDurationSeconds() > 0 || set.getDistanceMeters() > 0) {
+                    hasDurationWork = true;
+                }
+            }
+        }
+        if (sets >= 4 && overloads == 0) {
+            hiddenQuest.setValue("Hidden quest: Discipline over ego • Finish 2 more clean sets without needing a PR.");
+        } else if (overloads >= 2) {
+            hiddenQuest.setValue("Hidden quest: Momentum gate • Finish the workout with one controlled support set.");
+        } else if (volume >= 2500) {
+            hiddenQuest.setValue("Hidden quest: Heavy gate • Keep form clean and complete one back-off set.");
+        } else if (hasDurationWork && sets >= 3) {
+            hiddenQuest.setValue("Hidden quest: Recovery hunter • Add one easy mobility or cooldown block.");
+        }
     }
 
     private List<LoggedExercise> rebuildExerciseExp(List<LoggedExercise> exercises) {
