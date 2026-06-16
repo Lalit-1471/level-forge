@@ -22,4 +22,11 @@ public final class DatabaseMigrations {
                     + "PRIMARY KEY(`id`))");
         }
     };
+
+    public static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE `quest_definitions` ADD COLUMN `rarity` TEXT DEFAULT 'COMMON'");
+        }
+    };
 }

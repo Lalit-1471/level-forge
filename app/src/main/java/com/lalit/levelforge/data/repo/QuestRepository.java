@@ -17,6 +17,7 @@ import com.lalit.levelforge.data.local.entity.StreakState;
 import com.lalit.levelforge.data.model.ExpSourceType;
 import com.lalit.levelforge.data.model.ProgressionEventType;
 import com.lalit.levelforge.data.model.QuestMetricType;
+import com.lalit.levelforge.data.model.QuestRarity;
 import com.lalit.levelforge.data.model.QuestResetType;
 import com.lalit.levelforge.data.model.QuestRewardType;
 import com.lalit.levelforge.domain.calendar.TrainingCalendar;
@@ -166,6 +167,7 @@ public class QuestRepository {
                 "daily_login",
                 "Enter the gate",
                 "Open Level Forge once today.",
+                QuestRarity.COMMON,
                 QuestResetType.DAILY,
                 QuestMetricType.LOGIN,
                 1,
@@ -178,6 +180,7 @@ public class QuestRepository {
                 "daily_workout_posted",
                 "Complete one workout",
                 "Post any workout today.",
+                QuestRarity.COMMON,
                 QuestResetType.DAILY,
                 QuestMetricType.WORKOUT_POSTED,
                 1,
@@ -190,6 +193,7 @@ public class QuestRepository {
                 "daily_short_hunt",
                 "Short hunt",
                 "Complete four sets today, even if it is a quick session.",
+                QuestRarity.COMMON,
                 QuestResetType.DAILY,
                 QuestMetricType.SETS_COMPLETED,
                 4,
@@ -202,6 +206,7 @@ public class QuestRepository {
                 "daily_six_sets",
                 "Clear six sets",
                 "Complete six working, warmup, or failure sets today.",
+                QuestRarity.COMMON,
                 QuestResetType.DAILY,
                 QuestMetricType.SETS_COMPLETED,
                 6,
@@ -214,11 +219,12 @@ public class QuestRepository {
                 "daily_ten_sets",
                 "Volume gate",
                 "Complete ten sets today.",
+                QuestRarity.RARE,
                 QuestResetType.DAILY,
                 QuestMetricType.SETS_COMPLETED,
                 10,
                 QuestRewardType.EXP,
-                75,
+                95,
                 true,
                 18
         ));
@@ -226,11 +232,12 @@ public class QuestRepository {
                 "daily_overload",
                 "Trigger progressive overload",
                 "Beat a previous best by weight, reps, or volume.",
+                QuestRarity.RARE,
                 QuestResetType.DAILY,
                 QuestMetricType.PROGRESSIVE_OVERLOAD,
                 1,
                 QuestRewardType.EXP,
-                60,
+                85,
                 true,
                 20
         ));
@@ -238,11 +245,12 @@ public class QuestRepository {
                 "daily_double_overload",
                 "Double awakening",
                 "Trigger progressive overload twice today.",
+                QuestRarity.EPIC,
                 QuestResetType.DAILY,
                 QuestMetricType.PROGRESSIVE_OVERLOAD,
                 2,
                 QuestRewardType.EXP,
-                95,
+                140,
                 true,
                 25
         ));
@@ -250,11 +258,12 @@ public class QuestRepository {
                 "daily_weight_pr",
                 "Raise the ceiling",
                 "Set a new highest-weight PR today.",
+                QuestRarity.RARE,
                 QuestResetType.DAILY,
                 QuestMetricType.WEIGHT_PR,
                 1,
                 QuestRewardType.EXP,
-                70,
+                95,
                 true,
                 30
         ));
@@ -262,11 +271,12 @@ public class QuestRepository {
                 "daily_volume_pr",
                 "Forge more volume",
                 "Set a new highest-volume PR today.",
+                QuestRarity.RARE,
                 QuestResetType.DAILY,
                 QuestMetricType.VOLUME_PR,
                 1,
                 QuestRewardType.EXP,
-                70,
+                95,
                 true,
                 35
         ));
@@ -274,11 +284,12 @@ public class QuestRepository {
                 "daily_reps_pr",
                 "Break the rep limit",
                 "Set a new reps PR today.",
+                QuestRarity.RARE,
                 QuestResetType.DAILY,
                 QuestMetricType.REPS_PR,
                 1,
                 QuestRewardType.EXP,
-                65,
+                90,
                 true,
                 40
         ));
@@ -286,6 +297,7 @@ public class QuestRepository {
                 "weekly_three_workouts",
                 "Train three times",
                 "Post three workouts this week.",
+                QuestRarity.COMMON,
                 QuestResetType.WEEKLY,
                 QuestMetricType.WORKOUT_POSTED,
                 3,
@@ -298,6 +310,7 @@ public class QuestRepository {
                 "weekly_four_workouts",
                 "Four-gate week",
                 "Post four workouts this week.",
+                QuestRarity.RARE,
                 QuestResetType.WEEKLY,
                 QuestMetricType.WORKOUT_POSTED,
                 4,
@@ -310,6 +323,7 @@ public class QuestRepository {
                 "weekly_eighteen_sets",
                 "Build weekly volume",
                 "Complete eighteen sets this week.",
+                QuestRarity.COMMON,
                 QuestResetType.WEEKLY,
                 QuestMetricType.SETS_COMPLETED,
                 18,
@@ -322,11 +336,12 @@ public class QuestRepository {
                 "weekly_thirty_sets",
                 "High-volume raid",
                 "Complete thirty sets this week.",
+                QuestRarity.EPIC,
                 QuestResetType.WEEKLY,
                 QuestMetricType.SETS_COMPLETED,
                 30,
                 QuestRewardType.EXP,
-                280,
+                360,
                 true,
                 108
         ));
@@ -334,6 +349,7 @@ public class QuestRepository {
                 "weekly_two_overloads",
                 "Forge two new records",
                 "Hit progressive overload twice this week.",
+                QuestRarity.RARE,
                 QuestResetType.WEEKLY,
                 QuestMetricType.PROGRESSIVE_OVERLOAD,
                 2,
@@ -346,11 +362,12 @@ public class QuestRepository {
                 "weekly_five_overloads",
                 "Overload raid",
                 "Trigger progressive overload five times this week.",
+                QuestRarity.BOSS,
                 QuestResetType.WEEKLY,
                 QuestMetricType.PROGRESSIVE_OVERLOAD,
                 5,
                 QuestRewardType.EXP,
-                340,
+                520,
                 true,
                 115
         ));
@@ -358,11 +375,12 @@ public class QuestRepository {
                 "weekly_two_weight_prs",
                 "Iron ceiling raid",
                 "Set two highest-weight PRs this week.",
+                QuestRarity.EPIC,
                 QuestResetType.WEEKLY,
                 QuestMetricType.WEIGHT_PR,
                 2,
                 QuestRewardType.EXP,
-                280,
+                360,
                 true,
                 120
         ));
@@ -370,11 +388,12 @@ public class QuestRepository {
                 "weekly_two_volume_prs",
                 "Capacity raid",
                 "Set two highest-volume PRs this week.",
+                QuestRarity.EPIC,
                 QuestResetType.WEEKLY,
                 QuestMetricType.VOLUME_PR,
                 2,
                 QuestRewardType.EXP,
-                280,
+                360,
                 true,
                 125
         ));
@@ -382,11 +401,12 @@ public class QuestRepository {
                 "weekly_two_reps_prs",
                 "Endurance raid",
                 "Set two reps PRs this week.",
+                QuestRarity.EPIC,
                 QuestResetType.WEEKLY,
                 QuestMetricType.REPS_PR,
                 2,
                 QuestRewardType.EXP,
-                250,
+                330,
                 true,
                 130
         ));

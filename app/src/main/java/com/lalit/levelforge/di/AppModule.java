@@ -36,7 +36,7 @@ public final class AppModule {
     @Singleton
     static AppDatabase provideDatabase(@ApplicationContext Context context) {
         return Room.databaseBuilder(context, AppDatabase.class, "levelforge.db")
-                .addMigrations(DatabaseMigrations.MIGRATION_3_4)
+                .addMigrations(DatabaseMigrations.MIGRATION_3_4, DatabaseMigrations.MIGRATION_4_5)
                 .fallbackToDestructiveMigration()
                 .build();
     }

@@ -1,5 +1,6 @@
 package com.lalit.levelforge.ui.quest;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import com.lalit.levelforge.R;
 import com.lalit.levelforge.data.local.entity.QuestDefinition;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
 import com.lalit.levelforge.data.local.entity.StreakState;
+import com.lalit.levelforge.data.model.QuestRarity;
 import com.lalit.levelforge.data.model.QuestRewardType;
 import com.lalit.levelforge.databinding.FragmentQuestsBinding;
 import com.lalit.levelforge.databinding.ItemQuestCardBinding;
@@ -159,29 +161,30 @@ public class QuestFragment extends Fragment {
 
         itemBinding.questTitle.setText(definition.getTitle());
         itemBinding.questDescription.setText(definition.getDescription());
+        QuestRarity rarity = definition.getRarity() == null ? QuestRarity.COMMON : definition.getRarity();
+        int rarityColor = rarityColor(rarity);
+        itemBinding.questRarityPill.setText(pretty(rarity.name()));
+        itemBinding.questRarityPill.setTextColor(rarityColor);
         itemBinding.questMeta.setText(getString(
                 R.string.quests_card_meta,
                 pretty(definition.getMetricType().name()),
                 rewardText(definition)
         ));
+        itemBinding.questMeta.setTextColor(rarityColor);
         itemBinding.questProgressText.setText(getString(
                 R.string.quests_card_progress,
                 Math.min(progressCount, targetCount),
                 targetCount
         ));
         itemBinding.questProgressBar.setProgress(progressPercent);
+        itemBinding.questProgressBar.setProgressTintList(ColorStateList.valueOf(rarityColor));
         itemBinding.questStatePill.setText(stateText(completed, claimed));
 
         MaterialCardView card = itemBinding.getRoot();
-        int strokeColor = ContextCompat.getColor(requireContext(), R.color.slate_700);
-        if (completed && claimed) {
-            strokeColor = ContextCompat.getColor(requireContext(), R.color.emerald_400);
-        } else if (completed) {
-            strokeColor = ContextCompat.getColor(requireContext(), R.color.orange_400);
-        }
-        card.setStrokeColor(strokeColor);
+        card.setStrokeColor(rarityColor);
 
         if (completed && !claimed) {
+            itemBinding.questClaimButton.setVisibility(View.VISIBLE);
             itemBinding.questClaimButton.setEnabled(true);
             itemBinding.questClaimButton.setText(getString(
                     R.string.quests_claim_reward,
@@ -191,8 +194,7 @@ public class QuestFragment extends Fragment {
                     viewModel.claimReward(definition.getId(), periodStartMillis));
         } else {
             itemBinding.questClaimButton.setOnClickListener(null);
-            itemBinding.questClaimButton.setEnabled(false);
-            itemBinding.questClaimButton.setText(claimButtonText(completed, claimed));
+            itemBinding.questClaimButton.setVisibility(View.GONE);
         }
     }
 
@@ -245,16 +247,6 @@ public class QuestFragment extends Fragment {
         return getString(R.string.quests_state_active);
     }
 
-    private String claimButtonText(boolean completed, boolean claimed) {
-        if (claimed) {
-            return getString(R.string.quests_claimed);
-        }
-        if (completed) {
-            return getString(R.string.quests_claim_available);
-        }
-        return getString(R.string.quests_in_progress);
-    }
-
     private String pretty(String value) {
         String text = value.replace('_', ' ').toLowerCase(Locale.US);
         String[] words = text.split(" ");
@@ -269,6 +261,20 @@ public class QuestFragment extends Fragment {
             builder.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
         }
         return builder.toString();
+    }
+
+    private int rarityColor(QuestRarity rarity) {
+        switch (rarity) {
+            case RARE:
+                return ContextCompat.getColor(requireContext(), R.color.quest_rare);
+            case EPIC:
+                return ContextCompat.getColor(requireContext(), R.color.quest_epic);
+            case BOSS:
+                return ContextCompat.getColor(requireContext(), R.color.quest_boss);
+            case COMMON:
+            default:
+                return ContextCompat.getColor(requireContext(), R.color.quest_common);
+        }
     }
 
     @Override

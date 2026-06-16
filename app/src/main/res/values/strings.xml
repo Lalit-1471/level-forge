@@ -95,6 +95,8 @@
     <string name="profile_summary_label">Training archive</string>
     <string name="profile_summary_value">%1$d workouts • %2$d EXP earned</string>
     <string name="profile_logged_workouts">Logged workouts</string>
+    <string name="profile_badges_collected">Badges collected</string>
+    <string name="profile_empty_badges">Badges unlock from posted workouts, completed sets, and PR behavior.</string>
     <string name="profile_empty_workouts">No posted workouts yet. Finish and post a workout to see it here.</string>
     <string name="profile_workout_meta">%1$s • %2$s</string>
     <string name="profile_workout_exp">%1$d EXP</string>

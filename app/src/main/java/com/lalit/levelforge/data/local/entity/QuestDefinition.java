@@ -6,6 +6,7 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.lalit.levelforge.data.model.QuestMetricType;
+import com.lalit.levelforge.data.model.QuestRarity;
 import com.lalit.levelforge.data.model.QuestResetType;
 import com.lalit.levelforge.data.model.QuestRewardType;
 
@@ -18,6 +19,7 @@ public class QuestDefinition {
 
     private String title;
     private String description;
+    private QuestRarity rarity = QuestRarity.COMMON;
     private QuestResetType resetType;
     private QuestMetricType metricType;
     private int targetCount;
@@ -37,6 +39,7 @@ public class QuestDefinition {
         this.id = id;
         this.title = title;
         this.description = description;
+        this.rarity = QuestRarity.COMMON;
         this.resetType = resetType;
         this.metricType = metricType;
         this.targetCount = targetCount;
@@ -44,6 +47,16 @@ public class QuestDefinition {
         this.rewardAmount = rewardAmount;
         this.active = active;
         this.sortOrder = sortOrder;
+    }
+
+    @Ignore
+    public QuestDefinition(@NonNull String id, String title, String description, QuestRarity rarity,
+                           QuestResetType resetType, QuestMetricType metricType,
+                           int targetCount, QuestRewardType rewardType,
+                           int rewardAmount, boolean active, int sortOrder) {
+        this(id, title, description, resetType, metricType, targetCount, rewardType,
+                rewardAmount, active, sortOrder);
+        this.rarity = rarity;
     }
 
     @NonNull
@@ -69,6 +82,14 @@ public class QuestDefinition {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public QuestRarity getRarity() {
+        return rarity;
+    }
+
+    public void setRarity(QuestRarity rarity) {
+        this.rarity = rarity;
     }
 
     public QuestResetType getResetType() {

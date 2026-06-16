@@ -9,4 +9,8 @@
     <color name="orange_400">#FB923C</color>
     <color name="teal_300">#5EEAD4</color>
     <color name="emerald_400">#34D399</color>
+    <color name="quest_common">#94A3B8</color>
+    <color name="quest_rare">#60A5FA</color>
+    <color name="quest_epic">#BE185D</color>
+    <color name="quest_boss">#B45309</color>
 </resources>

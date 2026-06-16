@@ -39,7 +39,7 @@ import com.lalit.levelforge.data.local.entity.WorkoutSet;
                 LevelState.class,
                 UserProfile.class
         },
-        version = 4,
+        version = 5,
         exportSchema = true
 )
 @TypeConverters(RoomConverters.class)

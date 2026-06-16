@@ -8,6 +8,7 @@ import com.lalit.levelforge.data.model.GoalType;
 import com.lalit.levelforge.data.model.MuscleGroup;
 import com.lalit.levelforge.data.model.ProgressionEventType;
 import com.lalit.levelforge.data.model.QuestMetricType;
+import com.lalit.levelforge.data.model.QuestRarity;
 import com.lalit.levelforge.data.model.QuestResetType;
 import com.lalit.levelforge.data.model.QuestRewardType;
 import com.lalit.levelforge.data.model.RankTier;
@@ -127,6 +128,16 @@ public final class RoomConverters {
 
     @TypeConverter
     public static String fromQuestMetricType(QuestMetricType value) {
+        return value == null ? null : value.name();
+    }
+
+    @TypeConverter
+    public static QuestRarity toQuestRarity(String value) {
+        return value == null ? null : QuestRarity.valueOf(value);
+    }
+
+    @TypeConverter
+    public static String fromQuestRarity(QuestRarity value) {
         return value == null ? null : value.name();
     }
 

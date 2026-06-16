@@ -23,6 +23,7 @@ public class ProfileViewModel extends ViewModel {
 
     private final LiveData<List<WorkoutSession>> completedSessions;
     private final LiveData<LevelState> levelState;
+    private final LiveData<List<WorkoutSetWithExercise>> completedSetDetails;
     private final MutableLiveData<Long> selectedSessionId = new MutableLiveData<>();
     private final LiveData<List<WorkoutSetWithExercise>> selectedWorkoutSets;
 
@@ -31,6 +32,7 @@ public class ProfileViewModel extends ViewModel {
                             ProgressionRepository progressionRepository) {
         progressionRepository.initializeLevelStateIfNeeded();
         completedSessions = workoutRepository.observeCompletedSessions();
+        completedSetDetails = workoutRepository.observeCompletedSetDetails();
         levelState = progressionRepository.observeLevelState();
         selectedWorkoutSets = Transformations.switchMap(selectedSessionId, sessionId -> {
             if (sessionId == null || sessionId <= 0) {
@@ -48,6 +50,10 @@ public class ProfileViewModel extends ViewModel {
 
     public LiveData<LevelState> getLevelState() {
         return levelState;
+    }
+
+    public LiveData<List<WorkoutSetWithExercise>> getCompletedSetDetails() {
+        return completedSetDetails;
     }
 
     public LiveData<List<WorkoutSetWithExercise>> getSelectedWorkoutSets() {

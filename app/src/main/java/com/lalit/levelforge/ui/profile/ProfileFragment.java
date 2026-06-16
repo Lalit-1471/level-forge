@@ -18,10 +18,13 @@ import com.lalit.levelforge.data.local.entity.WorkoutSession;
 import com.lalit.levelforge.data.local.relation.WorkoutSetWithExercise;
 import com.lalit.levelforge.data.model.RankTier;
 import com.lalit.levelforge.databinding.FragmentProfileBinding;
+import com.lalit.levelforge.databinding.ItemProfileBadgeBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutDetailExerciseBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutDetailPanelBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutDetailSetBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutSessionBinding;
+import com.lalit.levelforge.domain.profile.HunterIdentityEvaluator;
+import com.lalit.levelforge.domain.profile.ProfileBadge;
 import com.lalit.levelforge.domain.progression.LevelCurve;
 
 import java.text.SimpleDateFormat;
@@ -39,7 +42,9 @@ public class ProfileFragment extends Fragment {
     private FragmentProfileBinding binding;
     private ProfileViewModel viewModel;
     private List<WorkoutSession> latestSessions = new ArrayList<>();
+    private List<WorkoutSetWithExercise> latestAllSetDetails = new ArrayList<>();
     private List<WorkoutSetWithExercise> selectedWorkoutDetails = new ArrayList<>();
+    private LevelState latestLevelState;
     private long selectedSessionId;
 
     @Nullable
@@ -55,7 +60,15 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
         viewModel.getCompletedSessions().observe(getViewLifecycleOwner(), this::renderWorkouts);
-        viewModel.getLevelState().observe(getViewLifecycleOwner(), this::renderPlayerStatus);
+        viewModel.getLevelState().observe(getViewLifecycleOwner(), levelState -> {
+            latestLevelState = levelState;
+            renderPlayerStatus(levelState);
+        });
+        viewModel.getCompletedSetDetails().observe(getViewLifecycleOwner(), details -> {
+            latestAllSetDetails = details == null ? new ArrayList<>() : new ArrayList<>(details);
+            renderPlayerStatus(latestLevelState);
+            renderBadges();
+        });
         viewModel.getSelectedWorkoutSets().observe(getViewLifecycleOwner(), details -> {
             selectedWorkoutDetails = details == null ? new ArrayList<>() : new ArrayList<>(details);
             renderWorkouts(latestSessions);
@@ -68,6 +81,8 @@ public class ProfileFragment extends Fragment {
         int workoutCount = latestSessions.size();
         int totalExp = totalExp(latestSessions);
         binding.profileSummaryValue.setText(getString(R.string.profile_summary_value, workoutCount, totalExp));
+        renderPlayerStatus(latestLevelState);
+        renderBadges();
 
         if (workoutCount == 0) {
             binding.emptyWorkoutsText.setVisibility(View.VISIBLE);
@@ -103,10 +118,18 @@ public class ProfileFragment extends Fragment {
     }
 
     private void renderPlayerStatus(LevelState levelState) {
+        if (binding == null) {
+            return;
+        }
         int totalExp = levelState == null ? 0 : levelState.getTotalExp();
         int level = levelState == null ? 1 : levelState.getLevel();
         RankTier rankTier = levelState == null ? RankTier.E : levelState.getRankTier();
-        String activeTitle = levelState == null ? "Novice Hunter" : levelState.getActiveTitle();
+        String fallbackTitle = levelState == null ? "Novice Hunter" : levelState.getActiveTitle();
+        String activeTitle = HunterIdentityEvaluator.behaviorTitleFor(
+                latestSessions,
+                latestAllSetDetails,
+                fallbackTitle
+        );
         int expIntoLevel = LevelCurve.expIntoCurrentLevel(totalExp);
         int expForLevel = LevelCurve.expToAdvanceFromLevel(LevelCurve.levelForTotalExp(totalExp));
         int progress = expForLevel <= 0 ? 0 : (int) Math.round((expIntoLevel * 100.0) / expForLevel);
@@ -116,6 +139,31 @@ public class ProfileFragment extends Fragment {
         binding.playerTitleValue.setText(activeTitle);
         binding.playerExpBar.setProgress(Math.max(0, Math.min(100, progress)));
         binding.playerExpValue.setText(getString(R.string.profile_player_exp, expIntoLevel, expForLevel, totalExp));
+    }
+
+    private void renderBadges() {
+        if (binding == null) {
+            return;
+        }
+        binding.badgeListContainer.removeAllViews();
+        List<ProfileBadge> badges = HunterIdentityEvaluator.collectedBadges(latestSessions, latestAllSetDetails);
+        if (badges.isEmpty()) {
+            binding.emptyBadgesText.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        binding.emptyBadgesText.setVisibility(View.GONE);
+        LayoutInflater inflater = LayoutInflater.from(requireContext());
+        for (ProfileBadge badge : badges) {
+            ItemProfileBadgeBinding badgeBinding = ItemProfileBadgeBinding.inflate(
+                    inflater,
+                    binding.badgeListContainer,
+                    false
+            );
+            badgeBinding.badgeTitle.setText(badge.getTitle());
+            badgeBinding.badgeDescription.setText(badge.getDescription());
+            binding.badgeListContainer.addView(badgeBinding.getRoot());
+        }
     }
 
     private void renderWorkoutDetail(LayoutInflater inflater, WorkoutSession session) {
