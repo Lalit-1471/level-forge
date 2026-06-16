@@ -28,6 +28,15 @@
             android:textColor="@color/slate_200"
             android:textSize="16sp" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/advancedStatsButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/stats_open_advanced"
+            android:textAllCaps="false"
+            app:cornerRadius="8dp" />
+
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

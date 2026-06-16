@@ -105,6 +105,7 @@
     <string name="profile_detail_exp_breakdown">Base %1$d • Effort +%2$d • Set type %3$+d</string>
     <string name="stats_title">Stats</string>
     <string name="stats_subtitle">Training trends, best efforts, and workout momentum.</string>
+    <string name="stats_open_advanced">Open advanced stats</string>
     <string name="stats_metric_workouts">Workouts</string>
     <string name="stats_metric_sets">Sets logged</string>
     <string name="stats_metric_volume">Total volume</string>
@@ -118,4 +119,23 @@
     <string name="stats_best_effort">Best effort</string>
     <string name="stats_best_session">Highest EXP workout</string>
     <string name="stats_empty_value">No data yet</string>
+    <string name="stats_back">Back</string>
+    <string name="advanced_stats_title">Advanced Stats</string>
+    <string name="advanced_stats_subtitle">Explore your training calendar, muscle balance, volume, overload days, and deeper patterns.</string>
+    <string name="stats_section_calendar">Calendar</string>
+    <string name="stats_section_muscles">Muscles</string>
+    <string name="stats_section_volume">Volume</string>
+    <string name="stats_section_overload">Overload</string>
+    <string name="stats_section_insights">Insights</string>
+    <string name="stats_calendar_title">Training calendar</string>
+    <string name="stats_calendar_description">See which workout was performed on each logged day.</string>
+    <string name="stats_muscle_title">Muscle distribution</string>
+    <string name="stats_muscle_description">Set distribution by primary muscle group, useful for spotting imbalance.</string>
+    <string name="stats_volume_title">Volume analytics</string>
+    <string name="stats_volume_description">Compare total training volume across recent workouts.</string>
+    <string name="stats_overload_title">Progressive overload days</string>
+    <string name="stats_overload_description">Days where an exercise beat its previous best by highest weight or highest set volume.</string>
+    <string name="stats_deep_insights_title">Deep insights</string>
+    <string name="stats_deep_insights_description">Useful patterns pulled from your current training archive.</string>
+    <string name="stats_no_overload">No overload events yet. Log repeat exercises to unlock PR days.</string>
 </resources>

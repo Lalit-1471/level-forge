@@ -37,7 +37,16 @@
     <fragment
         android:id="@+id/statsFragment"
         android:name="com.lalit.levelforge.ui.stats.StatsFragment"
-        android:label="@string/stats_title" />
+        android:label="@string/stats_title">
+        <action
+            android:id="@+id/action_statsFragment_to_advancedStatsFragment"
+            app:destination="@id/advancedStatsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/advancedStatsFragment"
+        android:name="com.lalit.levelforge.ui.stats.AdvancedStatsFragment"
+        android:label="@string/advanced_stats_title" />
 
     <fragment
         android:id="@+id/workoutLoggerFragment"

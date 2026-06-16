@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.lalit.levelforge.R;
 import com.lalit.levelforge.data.local.entity.Exercise;
@@ -55,6 +56,8 @@ public class StatsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(StatsViewModel.class);
+        binding.advancedStatsButton.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_statsFragment_to_advancedStatsFragment));
 
         viewModel.getCompletedSessions().observe(getViewLifecycleOwner(), sessions -> {
             latestSessions = sessions == null ? new ArrayList<>() : new ArrayList<>(sessions);
