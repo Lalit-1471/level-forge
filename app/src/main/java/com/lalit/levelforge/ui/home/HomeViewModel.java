@@ -9,7 +9,6 @@ import com.lalit.levelforge.data.local.entity.QuestDefinition;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
 import com.lalit.levelforge.data.local.entity.UserProfile;
 import com.lalit.levelforge.data.local.entity.WorkoutSession;
-import com.lalit.levelforge.data.model.QuestResetType;
 import com.lalit.levelforge.data.repo.ExerciseRepository;
 import com.lalit.levelforge.data.repo.ProgressionRepository;
 import com.lalit.levelforge.data.repo.QuestRepository;
@@ -17,6 +16,7 @@ import com.lalit.levelforge.data.repo.UserProfileRepository;
 import com.lalit.levelforge.data.repo.WorkoutRepository;
 import com.lalit.levelforge.domain.calendar.TrainingCalendar;
 import com.lalit.levelforge.domain.progression.LevelCurve;
+import com.lalit.levelforge.domain.quest.QuestRotation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -154,10 +154,11 @@ public class HomeViewModel extends ViewModel {
 
         QuestDefinition firstPendingQuest = null;
         QuestProgress firstPendingProgress = null;
-        for (QuestDefinition definition : latestQuestDefinitions) {
-            if (definition.getResetType() != QuestResetType.DAILY) {
-                continue;
-            }
+        List<QuestDefinition> visibleDailyQuests = QuestRotation.visibleDailyQuests(
+                latestQuestDefinitions,
+                TrainingCalendar.startOfDay(System.currentTimeMillis())
+        );
+        for (QuestDefinition definition : visibleDailyQuests) {
             QuestProgress progress = progressByQuest.get(definition.getId());
             if (progress != null && progress.isCompleted() && !progress.isRewardClaimed()) {
                 dailyTask.setValue("Claim reward: " + definition.getTitle()

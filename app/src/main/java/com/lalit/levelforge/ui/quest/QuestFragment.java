@@ -15,10 +15,11 @@ import com.google.android.material.card.MaterialCardView;
 import com.lalit.levelforge.R;
 import com.lalit.levelforge.data.local.entity.QuestDefinition;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
-import com.lalit.levelforge.data.model.QuestResetType;
+import com.lalit.levelforge.data.local.entity.StreakState;
 import com.lalit.levelforge.data.model.QuestRewardType;
 import com.lalit.levelforge.databinding.FragmentQuestsBinding;
 import com.lalit.levelforge.databinding.ItemQuestCardBinding;
+import com.lalit.levelforge.domain.quest.QuestRotation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +37,7 @@ public class QuestFragment extends Fragment {
     private List<QuestDefinition> definitions = new ArrayList<>();
     private List<QuestProgress> dailyProgress = new ArrayList<>();
     private List<QuestProgress> weeklyProgress = new ArrayList<>();
+    private StreakState streakState;
 
     @Nullable
     @Override
@@ -61,6 +63,10 @@ public class QuestFragment extends Fragment {
             weeklyProgress = value == null ? new ArrayList<>() : new ArrayList<>(value);
             renderQuests();
         });
+        viewModel.getStreakState().observe(getViewLifecycleOwner(), value -> {
+            streakState = value;
+            renderQuests();
+        });
     }
 
     private void renderQuests() {
@@ -72,11 +78,18 @@ public class QuestFragment extends Fragment {
         binding.weeklyQuestContainer.removeAllViews();
 
         LayoutInflater inflater = LayoutInflater.from(requireContext());
-        List<QuestDefinition> dailyDefinitions = definitionsFor(QuestResetType.DAILY);
-        List<QuestDefinition> weeklyDefinitions = definitionsFor(QuestResetType.WEEKLY);
+        List<QuestDefinition> dailyDefinitions = QuestRotation.visibleDailyQuests(
+                definitions,
+                viewModel.getTodayStartMillis()
+        );
+        List<QuestDefinition> weeklyDefinitions = QuestRotation.visibleWeeklyQuests(
+                definitions,
+                viewModel.getWeekStartMillis()
+        );
         Map<String, QuestProgress> dailyProgressByQuest = progressByQuestId(dailyProgress);
         Map<String, QuestProgress> weeklyProgressByQuest = progressByQuestId(weeklyProgress);
 
+        renderStreakState();
         renderSummary(dailyDefinitions, dailyProgressByQuest, weeklyDefinitions, weeklyProgressByQuest);
         renderQuestSection(inflater, binding.dailyQuestContainer, dailyDefinitions,
                 dailyProgressByQuest, viewModel.getTodayStartMillis());
@@ -84,6 +97,18 @@ public class QuestFragment extends Fragment {
                 weeklyProgressByQuest, viewModel.getWeekStartMillis());
 
         binding.emptyQuestText.setVisibility(definitions.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void renderStreakState() {
+        int currentStreak = streakState == null ? 0 : streakState.getCurrentStreakDays();
+        int longestStreak = streakState == null ? 0 : streakState.getLongestStreakDays();
+        int shields = streakState == null ? 0 : streakState.getStreakShields();
+        binding.streakSummaryValue.setText(getString(R.string.quests_streak_days, currentStreak));
+        binding.bestStreakValue.setText(getString(R.string.quests_best_streak, longestStreak));
+        binding.shieldSummaryValue.setText(getString(R.string.quests_shields_available, shields));
+        binding.shieldHintText.setText(shields > 0
+                ? getString(R.string.quests_shield_ready)
+                : getString(R.string.quests_shield_earn));
     }
 
     private void renderSummary(List<QuestDefinition> dailyDefinitions,
@@ -169,16 +194,6 @@ public class QuestFragment extends Fragment {
             itemBinding.questClaimButton.setEnabled(false);
             itemBinding.questClaimButton.setText(claimButtonText(completed, claimed));
         }
-    }
-
-    private List<QuestDefinition> definitionsFor(QuestResetType resetType) {
-        List<QuestDefinition> filtered = new ArrayList<>();
-        for (QuestDefinition definition : definitions) {
-            if (definition.getResetType() == resetType) {
-                filtered.add(definition);
-            }
-        }
-        return filtered;
     }
 
     private Map<String, QuestProgress> progressByQuestId(List<QuestProgress> progressList) {

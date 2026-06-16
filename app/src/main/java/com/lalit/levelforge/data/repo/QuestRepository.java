@@ -7,11 +7,13 @@ import com.lalit.levelforge.data.local.dao.LevelStateDao;
 import com.lalit.levelforge.data.local.dao.ProgressionEventDao;
 import com.lalit.levelforge.data.local.dao.QuestDefinitionDao;
 import com.lalit.levelforge.data.local.dao.QuestProgressDao;
+import com.lalit.levelforge.data.local.dao.StreakStateDao;
 import com.lalit.levelforge.data.local.entity.ExpEvent;
 import com.lalit.levelforge.data.local.entity.LevelState;
 import com.lalit.levelforge.data.local.entity.ProgressionEvent;
 import com.lalit.levelforge.data.local.entity.QuestDefinition;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
+import com.lalit.levelforge.data.local.entity.StreakState;
 import com.lalit.levelforge.data.model.ExpSourceType;
 import com.lalit.levelforge.data.model.ProgressionEventType;
 import com.lalit.levelforge.data.model.QuestMetricType;
@@ -39,6 +41,7 @@ public class QuestRepository {
     private final ProgressionEventDao progressionEventDao;
     private final ExpEventDao expEventDao;
     private final LevelStateDao levelStateDao;
+    private final StreakStateDao streakStateDao;
     private final Executor diskExecutor = Executors.newSingleThreadExecutor();
 
     @Inject
@@ -46,12 +49,14 @@ public class QuestRepository {
                            QuestProgressDao questProgressDao,
                            ProgressionEventDao progressionEventDao,
                            ExpEventDao expEventDao,
-                           LevelStateDao levelStateDao) {
+                           LevelStateDao levelStateDao,
+                           StreakStateDao streakStateDao) {
         this.questDefinitionDao = questDefinitionDao;
         this.questProgressDao = questProgressDao;
         this.progressionEventDao = progressionEventDao;
         this.expEventDao = expEventDao;
         this.levelStateDao = levelStateDao;
+        this.streakStateDao = streakStateDao;
     }
 
     public LiveData<List<QuestDefinition>> observeActiveDefinitions() {
@@ -60,6 +65,10 @@ public class QuestRepository {
 
     public LiveData<List<QuestProgress>> observeProgressForPeriod(long periodStartMillis) {
         return questProgressDao.observeProgressForPeriod(periodStartMillis);
+    }
+
+    public LiveData<StreakState> observeStreakState() {
+        return streakStateDao.observeStreakState();
     }
 
     public void seedDefaultQuestDefinitions() {
@@ -79,6 +88,7 @@ public class QuestRepository {
             if (loginsToday > 0) {
                 return;
             }
+            updateLoginStreak(dayStart, now);
             ProgressionEvent event = new ProgressionEvent(
                     ProgressionEventType.LOGIN,
                     0,
@@ -177,6 +187,18 @@ public class QuestRepository {
                 10
         ));
         definitions.add(new QuestDefinition(
+                "daily_short_hunt",
+                "Short hunt",
+                "Complete four sets today, even if it is a quick session.",
+                QuestResetType.DAILY,
+                QuestMetricType.SETS_COMPLETED,
+                4,
+                QuestRewardType.EXP,
+                35,
+                true,
+                12
+        ));
+        definitions.add(new QuestDefinition(
                 "daily_six_sets",
                 "Clear six sets",
                 "Complete six working, warmup, or failure sets today.",
@@ -187,6 +209,18 @@ public class QuestRepository {
                 50,
                 true,
                 15
+        ));
+        definitions.add(new QuestDefinition(
+                "daily_ten_sets",
+                "Volume gate",
+                "Complete ten sets today.",
+                QuestResetType.DAILY,
+                QuestMetricType.SETS_COMPLETED,
+                10,
+                QuestRewardType.EXP,
+                75,
+                true,
+                18
         ));
         definitions.add(new QuestDefinition(
                 "daily_overload",
@@ -201,6 +235,54 @@ public class QuestRepository {
                 20
         ));
         definitions.add(new QuestDefinition(
+                "daily_double_overload",
+                "Double awakening",
+                "Trigger progressive overload twice today.",
+                QuestResetType.DAILY,
+                QuestMetricType.PROGRESSIVE_OVERLOAD,
+                2,
+                QuestRewardType.EXP,
+                95,
+                true,
+                25
+        ));
+        definitions.add(new QuestDefinition(
+                "daily_weight_pr",
+                "Raise the ceiling",
+                "Set a new highest-weight PR today.",
+                QuestResetType.DAILY,
+                QuestMetricType.WEIGHT_PR,
+                1,
+                QuestRewardType.EXP,
+                70,
+                true,
+                30
+        ));
+        definitions.add(new QuestDefinition(
+                "daily_volume_pr",
+                "Forge more volume",
+                "Set a new highest-volume PR today.",
+                QuestResetType.DAILY,
+                QuestMetricType.VOLUME_PR,
+                1,
+                QuestRewardType.EXP,
+                70,
+                true,
+                35
+        ));
+        definitions.add(new QuestDefinition(
+                "daily_reps_pr",
+                "Break the rep limit",
+                "Set a new reps PR today.",
+                QuestResetType.DAILY,
+                QuestMetricType.REPS_PR,
+                1,
+                QuestRewardType.EXP,
+                65,
+                true,
+                40
+        ));
+        definitions.add(new QuestDefinition(
                 "weekly_three_workouts",
                 "Train three times",
                 "Post three workouts this week.",
@@ -211,6 +293,18 @@ public class QuestRepository {
                 180,
                 true,
                 100
+        ));
+        definitions.add(new QuestDefinition(
+                "weekly_four_workouts",
+                "Four-gate week",
+                "Post four workouts this week.",
+                QuestResetType.WEEKLY,
+                QuestMetricType.WORKOUT_POSTED,
+                4,
+                QuestRewardType.EXP,
+                260,
+                true,
+                102
         ));
         definitions.add(new QuestDefinition(
                 "weekly_eighteen_sets",
@@ -225,6 +319,18 @@ public class QuestRepository {
                 105
         ));
         definitions.add(new QuestDefinition(
+                "weekly_thirty_sets",
+                "High-volume raid",
+                "Complete thirty sets this week.",
+                QuestResetType.WEEKLY,
+                QuestMetricType.SETS_COMPLETED,
+                30,
+                QuestRewardType.EXP,
+                280,
+                true,
+                108
+        ));
+        definitions.add(new QuestDefinition(
                 "weekly_two_overloads",
                 "Forge two new records",
                 "Hit progressive overload twice this week.",
@@ -236,7 +342,96 @@ public class QuestRepository {
                 true,
                 110
         ));
+        definitions.add(new QuestDefinition(
+                "weekly_five_overloads",
+                "Overload raid",
+                "Trigger progressive overload five times this week.",
+                QuestResetType.WEEKLY,
+                QuestMetricType.PROGRESSIVE_OVERLOAD,
+                5,
+                QuestRewardType.EXP,
+                340,
+                true,
+                115
+        ));
+        definitions.add(new QuestDefinition(
+                "weekly_two_weight_prs",
+                "Iron ceiling raid",
+                "Set two highest-weight PRs this week.",
+                QuestResetType.WEEKLY,
+                QuestMetricType.WEIGHT_PR,
+                2,
+                QuestRewardType.EXP,
+                280,
+                true,
+                120
+        ));
+        definitions.add(new QuestDefinition(
+                "weekly_two_volume_prs",
+                "Capacity raid",
+                "Set two highest-volume PRs this week.",
+                QuestResetType.WEEKLY,
+                QuestMetricType.VOLUME_PR,
+                2,
+                QuestRewardType.EXP,
+                280,
+                true,
+                125
+        ));
+        definitions.add(new QuestDefinition(
+                "weekly_two_reps_prs",
+                "Endurance raid",
+                "Set two reps PRs this week.",
+                QuestResetType.WEEKLY,
+                QuestMetricType.REPS_PR,
+                2,
+                QuestRewardType.EXP,
+                250,
+                true,
+                130
+        ));
         return definitions;
+    }
+
+    private void updateLoginStreak(long todayStart, long now) {
+        StreakState state = streakStateDao.getStreakState();
+        if (state == null) {
+            state = new StreakState();
+        }
+
+        long lastLoginDay = state.getLastLoginDayStartMillis();
+        int previousStreak = state.getCurrentStreakDays();
+        int nextStreak = previousStreak <= 0 ? 1 : previousStreak;
+        int shields = state.getStreakShields();
+
+        if (lastLoginDay <= 0) {
+            nextStreak = 1;
+        } else {
+            int daysSinceLastLogin = TrainingCalendar.daysBetween(lastLoginDay, todayStart);
+            if (daysSinceLastLogin == 1) {
+                nextStreak = previousStreak + 1;
+            } else if (daysSinceLastLogin > 1) {
+                int missedDays = daysSinceLastLogin - 1;
+                if (shields >= missedDays) {
+                    shields -= missedDays;
+                    nextStreak = previousStreak + 1;
+                } else {
+                    shields = 0;
+                    nextStreak = 1;
+                }
+            }
+        }
+
+        if (nextStreak > previousStreak && nextStreak % 7 == 0) {
+            shields = Math.min(2, shields + 1);
+        }
+
+        state.setCurrentStreakDays(nextStreak);
+        state.setLongestStreakDays(Math.max(state.getLongestStreakDays(), nextStreak));
+        state.setStreakShields(shields);
+        state.setLastLoginDayStartMillis(todayStart);
+        state.setUpdatedAt(now);
+        streakStateDao.upsert(state);
     }
 
     private void updateLevelState(int totalExp, long now) {

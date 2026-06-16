@@ -5,12 +5,14 @@ import android.content.Context;
 import androidx.room.Room;
 
 import com.lalit.levelforge.data.local.AppDatabase;
+import com.lalit.levelforge.data.local.DatabaseMigrations;
 import com.lalit.levelforge.data.local.dao.ExerciseDao;
 import com.lalit.levelforge.data.local.dao.ExpEventDao;
 import com.lalit.levelforge.data.local.dao.LevelStateDao;
 import com.lalit.levelforge.data.local.dao.ProgressionEventDao;
 import com.lalit.levelforge.data.local.dao.QuestDefinitionDao;
 import com.lalit.levelforge.data.local.dao.QuestProgressDao;
+import com.lalit.levelforge.data.local.dao.StreakStateDao;
 import com.lalit.levelforge.data.local.dao.UserProfileDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSessionDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSetDao;
@@ -34,6 +36,7 @@ public final class AppModule {
     @Singleton
     static AppDatabase provideDatabase(@ApplicationContext Context context) {
         return Room.databaseBuilder(context, AppDatabase.class, "levelforge.db")
+                .addMigrations(DatabaseMigrations.MIGRATION_3_4)
                 .fallbackToDestructiveMigration()
                 .build();
     }
@@ -71,6 +74,11 @@ public final class AppModule {
     @Provides
     static QuestProgressDao provideQuestProgressDao(AppDatabase appDatabase) {
         return appDatabase.questProgressDao();
+    }
+
+    @Provides
+    static StreakStateDao provideStreakStateDao(AppDatabase appDatabase) {
+        return appDatabase.streakStateDao();
     }
 
     @Provides

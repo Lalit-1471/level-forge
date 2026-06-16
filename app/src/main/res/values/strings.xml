@@ -146,6 +146,13 @@
     <string name="quests_week">This week</string>
     <string name="quests_summary_progress">%1$d / %2$d</string>
     <string name="quests_rewards_waiting">%1$d rewards ready to claim</string>
+    <string name="quests_streak">Login streak</string>
+    <string name="quests_shields">Streak shields</string>
+    <string name="quests_streak_days">%1$d days</string>
+    <string name="quests_best_streak">Best streak: %1$d days</string>
+    <string name="quests_shields_available">%1$d ready</string>
+    <string name="quests_shield_ready">A shield will automatically protect your streak if you miss a day.</string>
+    <string name="quests_shield_earn">Earn 1 streak shield every 7-day streak. Max 2 shields.</string>
     <string name="quests_daily_section">Daily gates</string>
     <string name="quests_weekly_section">Weekly raids</string>
     <string name="quests_empty">Quest board is preparing. Check back in a moment.</string>

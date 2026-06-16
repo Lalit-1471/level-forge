@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.lalit.levelforge.data.local.entity.QuestDefinition;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
+import com.lalit.levelforge.data.local.entity.StreakState;
 import com.lalit.levelforge.data.repo.QuestRepository;
 import com.lalit.levelforge.domain.calendar.TrainingCalendar;
 
@@ -41,6 +42,10 @@ public class QuestViewModel extends ViewModel {
 
     public LiveData<List<QuestProgress>> getWeeklyProgress() {
         return questRepository.observeProgressForPeriod(weekStartMillis);
+    }
+
+    public LiveData<StreakState> getStreakState() {
+        return questRepository.observeStreakState();
     }
 
     public long getTodayStartMillis() {
