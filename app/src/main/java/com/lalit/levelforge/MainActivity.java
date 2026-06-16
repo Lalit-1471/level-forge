@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
             int destinationId = destination.getId();
             boolean showTabs = destinationId == R.id.homeFragment
                     || destinationId == R.id.statsFragment
+                    || destinationId == R.id.questsFragment
                     || destinationId == R.id.profileFragment;
             binding.bottomNavigation.setVisibility(showTabs ? View.VISIBLE : View.GONE);
         });

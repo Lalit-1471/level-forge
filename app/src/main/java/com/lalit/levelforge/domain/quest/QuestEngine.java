@@ -18,12 +18,14 @@ public final class QuestEngine {
         QuestMetricType metricType = definition.getMetricType();
         ProgressionEventType eventType = event.getEventType();
         switch (metricType) {
+            case LOGIN:
+                return eventType == ProgressionEventType.LOGIN;
             case WORKOUT_POSTED:
                 return eventType == ProgressionEventType.WORKOUT_POSTED;
+            case SETS_COMPLETED:
+                return eventType == ProgressionEventType.SET_COMPLETED;
             case PROGRESSIVE_OVERLOAD:
-                return eventType == ProgressionEventType.WEIGHT_PR
-                        || eventType == ProgressionEventType.VOLUME_PR
-                        || eventType == ProgressionEventType.REPS_PR;
+                return eventType == ProgressionEventType.PROGRESSIVE_OVERLOAD;
             case WEIGHT_PR:
                 return eventType == ProgressionEventType.WEIGHT_PR;
             case VOLUME_PR:

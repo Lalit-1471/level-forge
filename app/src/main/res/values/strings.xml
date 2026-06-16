@@ -14,6 +14,7 @@
     <string name="dashboard_exercise_library">Exercise library</string>
     <string name="tab_home">Home</string>
     <string name="tab_stats">Stats</string>
+    <string name="tab_quests">Quests</string>
     <string name="tab_profile">Profile</string>
     <string name="onboarding_title">Awakening Setup</string>
     <string name="onboarding_subtitle">Create your hunter profile and get a one-time nutrition target.</string>
@@ -138,4 +139,28 @@
     <string name="stats_deep_insights_title">Deep insights</string>
     <string name="stats_deep_insights_description">Useful patterns pulled from your current training archive.</string>
     <string name="stats_no_overload">No overload events yet. Log repeat exercises to unlock PR days.</string>
+    <string name="quests_title">Quests</string>
+    <string name="quests_subtitle">Daily gates and weekly raids that turn consistency into bonus EXP.</string>
+    <string name="quests_command_center">Quest command center</string>
+    <string name="quests_today">Today</string>
+    <string name="quests_week">This week</string>
+    <string name="quests_summary_progress">%1$d / %2$d</string>
+    <string name="quests_rewards_waiting">%1$d rewards ready to claim</string>
+    <string name="quests_daily_section">Daily gates</string>
+    <string name="quests_weekly_section">Weekly raids</string>
+    <string name="quests_empty">Quest board is preparing. Check back in a moment.</string>
+    <string name="quests_card_meta">%1$s • %2$s</string>
+    <string name="quests_card_progress">%1$d/%2$d</string>
+    <string name="quests_reward_exp">+%1$d EXP</string>
+    <string name="quests_reward_title">Title reward</string>
+    <string name="quests_state_active">ACTIVE</string>
+    <string name="quests_state_ready">READY</string>
+    <string name="quests_state_claimed">CLAIMED</string>
+    <string name="quests_claim_reward">Claim +%1$d EXP</string>
+    <string name="quests_claimed">Reward claimed</string>
+    <string name="quests_claim_available">Ready to claim</string>
+    <string name="quests_in_progress">In progress</string>
+    <string name="dashboard_quest_ready">Claim reward: %1$s (+%2$d EXP)</string>
+    <string name="dashboard_quest_progress">%1$s • %2$d/%3$d</string>
+    <string name="dashboard_quest_complete">Daily gates cleared. New quests arrive tomorrow.</string>
 </resources>

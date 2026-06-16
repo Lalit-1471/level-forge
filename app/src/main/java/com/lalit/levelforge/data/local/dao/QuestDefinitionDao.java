@@ -18,6 +18,9 @@ public interface QuestDefinitionDao {
     @Query("SELECT * FROM quest_definitions WHERE active = 1 ORDER BY sortOrder")
     List<QuestDefinition> getActiveDefinitions();
 
+    @Query("SELECT * FROM quest_definitions WHERE id = :questId LIMIT 1")
+    QuestDefinition getDefinition(String questId);
+
     @Upsert
     void upsertAll(List<QuestDefinition> definitions);
 }

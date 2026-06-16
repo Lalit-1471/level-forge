@@ -113,6 +113,24 @@ public class WorkoutLogRepository {
     }
 
     private void insertSetProgressionEvents(long sessionId, WorkoutSet set, long now) {
+        insertProgressionEvent(
+                ProgressionEventType.SET_COMPLETED,
+                sessionId,
+                set,
+                1,
+                "Completed set",
+                now
+        );
+        if (set.isProgressiveOverload()) {
+            insertProgressionEvent(
+                    ProgressionEventType.PROGRESSIVE_OVERLOAD,
+                    sessionId,
+                    set,
+                    set.getOverloadExp(),
+                    "Progressive overload",
+                    now
+            );
+        }
         if (set.isWeightPr()) {
             insertProgressionEvent(
                     ProgressionEventType.WEIGHT_PR,
