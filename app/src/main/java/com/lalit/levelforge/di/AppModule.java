@@ -8,6 +8,9 @@ import com.lalit.levelforge.data.local.AppDatabase;
 import com.lalit.levelforge.data.local.dao.ExerciseDao;
 import com.lalit.levelforge.data.local.dao.ExpEventDao;
 import com.lalit.levelforge.data.local.dao.LevelStateDao;
+import com.lalit.levelforge.data.local.dao.ProgressionEventDao;
+import com.lalit.levelforge.data.local.dao.QuestDefinitionDao;
+import com.lalit.levelforge.data.local.dao.QuestProgressDao;
 import com.lalit.levelforge.data.local.dao.UserProfileDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSessionDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSetDao;
@@ -53,6 +56,21 @@ public final class AppModule {
     @Provides
     static ExpEventDao provideExpEventDao(AppDatabase appDatabase) {
         return appDatabase.expEventDao();
+    }
+
+    @Provides
+    static ProgressionEventDao provideProgressionEventDao(AppDatabase appDatabase) {
+        return appDatabase.progressionEventDao();
+    }
+
+    @Provides
+    static QuestDefinitionDao provideQuestDefinitionDao(AppDatabase appDatabase) {
+        return appDatabase.questDefinitionDao();
+    }
+
+    @Provides
+    static QuestProgressDao provideQuestProgressDao(AppDatabase appDatabase) {
+        return appDatabase.questProgressDao();
     }
 
     @Provides

@@ -5,13 +5,16 @@ import android.os.Looper;
 
 import com.lalit.levelforge.data.local.dao.ExpEventDao;
 import com.lalit.levelforge.data.local.dao.LevelStateDao;
+import com.lalit.levelforge.data.local.dao.ProgressionEventDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSessionDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSetDao;
 import com.lalit.levelforge.data.local.entity.ExpEvent;
 import com.lalit.levelforge.data.local.entity.LevelState;
+import com.lalit.levelforge.data.local.entity.ProgressionEvent;
 import com.lalit.levelforge.data.local.entity.WorkoutSession;
 import com.lalit.levelforge.data.local.entity.WorkoutSet;
 import com.lalit.levelforge.data.model.ExpSourceType;
+import com.lalit.levelforge.data.model.ProgressionEventType;
 import com.lalit.levelforge.data.model.RankTier;
 import com.lalit.levelforge.domain.progression.LevelCurve;
 import com.lalit.levelforge.domain.progression.RankEvaluator;
@@ -38,6 +41,8 @@ public class WorkoutLogRepository {
     private final WorkoutSessionDao workoutSessionDao;
     private final WorkoutSetDao workoutSetDao;
     private final ExpEventDao expEventDao;
+    private final ProgressionEventDao progressionEventDao;
+    private final QuestRepository questRepository;
     private final LevelStateDao levelStateDao;
     private final Executor diskExecutor = Executors.newSingleThreadExecutor();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -46,10 +51,14 @@ public class WorkoutLogRepository {
     public WorkoutLogRepository(WorkoutSessionDao workoutSessionDao,
                                 WorkoutSetDao workoutSetDao,
                                 ExpEventDao expEventDao,
+                                ProgressionEventDao progressionEventDao,
+                                QuestRepository questRepository,
                                 LevelStateDao levelStateDao) {
         this.workoutSessionDao = workoutSessionDao;
         this.workoutSetDao = workoutSetDao;
         this.expEventDao = expEventDao;
+        this.progressionEventDao = progressionEventDao;
+        this.questRepository = questRepository;
         this.levelStateDao = levelStateDao;
     }
 
@@ -71,8 +80,22 @@ public class WorkoutLogRepository {
             for (WorkoutSet set : sets) {
                 set.setSessionId(sessionId);
                 set.setCompleted(true);
-                workoutSetDao.insert(set);
+                long workoutSetId = workoutSetDao.insert(set);
+                set.setId(workoutSetId);
+                insertSetProgressionEvents(sessionId, set, now);
             }
+
+            ProgressionEvent workoutPostedEvent = new ProgressionEvent(
+                    ProgressionEventType.WORKOUT_POSTED,
+                    sessionId,
+                    0,
+                    0,
+                    totalExp,
+                    title,
+                    now
+            );
+            progressionEventDao.insert(workoutPostedEvent);
+            questRepository.applyProgressionEvent(workoutPostedEvent);
 
             expEventDao.insert(new ExpEvent(
                     ExpSourceType.WORKOUT,
@@ -87,6 +110,58 @@ public class WorkoutLogRepository {
                 mainHandler.post(() -> callback.onSaved(sessionId, totalExp));
             }
         });
+    }
+
+    private void insertSetProgressionEvents(long sessionId, WorkoutSet set, long now) {
+        if (set.isWeightPr()) {
+            insertProgressionEvent(
+                    ProgressionEventType.WEIGHT_PR,
+                    sessionId,
+                    set,
+                    set.getWeightKg(),
+                    "New weight PR",
+                    now
+            );
+        }
+        if (set.isVolumePr()) {
+            insertProgressionEvent(
+                    ProgressionEventType.VOLUME_PR,
+                    sessionId,
+                    set,
+                    setVolume(set),
+                    "New set volume PR",
+                    now
+            );
+        }
+        if (set.isRepsPr()) {
+            insertProgressionEvent(
+                    ProgressionEventType.REPS_PR,
+                    sessionId,
+                    set,
+                    set.getReps(),
+                    "New reps PR",
+                    now
+            );
+        }
+    }
+
+    private void insertProgressionEvent(ProgressionEventType eventType, long sessionId,
+                                        WorkoutSet set, double value, String label, long createdAt) {
+        ProgressionEvent progressionEvent = new ProgressionEvent(
+                eventType,
+                sessionId,
+                set.getId(),
+                set.getExerciseId(),
+                value,
+                label,
+                createdAt
+        );
+        progressionEventDao.insert(progressionEvent);
+        questRepository.applyProgressionEvent(progressionEvent);
+    }
+
+    private double setVolume(WorkoutSet set) {
+        return set.getWeightKg() * Math.max(1, set.getReps());
     }
 
     public void getCompletedSetsForExercise(long exerciseId, ExerciseSetsCallback callback) {

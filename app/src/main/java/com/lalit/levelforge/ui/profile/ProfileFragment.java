@@ -22,8 +22,6 @@ import com.lalit.levelforge.databinding.ItemWorkoutDetailExerciseBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutDetailPanelBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutDetailSetBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutSessionBinding;
-import com.lalit.levelforge.domain.progression.ExpBreakdown;
-import com.lalit.levelforge.domain.progression.ExpCalculator;
 import com.lalit.levelforge.domain.progression.LevelCurve;
 
 import java.text.SimpleDateFormat;
@@ -148,14 +146,15 @@ public class ProfileFragment extends Fragment {
                 }
 
                 ItemWorkoutDetailSetBinding setBinding = ItemWorkoutDetailSetBinding.inflate(inflater, detailBinding.detailContainer, false);
-                ExpBreakdown breakdown = ExpCalculator.breakdownForSet(exercise, workoutSet, false);
                 setBinding.detailSetValue.setText(setLabel(workoutSet) + " • " + setDetails(workoutSet));
-                setBinding.detailSetExp.setText(getString(R.string.profile_detail_set_exp, breakdown.getTotalExp()));
+                setBinding.detailSetExp.setText(getString(R.string.profile_detail_set_exp, workoutSet.getTotalExp()));
                 setBinding.detailSetBreakdown.setText(getString(
                         R.string.profile_detail_exp_breakdown,
-                        breakdown.getBaseExp(),
-                        breakdown.getEffortExp(),
-                        breakdown.getSetTypeExp()
+                        workoutSet.getBaseExp(),
+                        workoutSet.getEffortExp(),
+                        workoutSet.getSetTypeExp(),
+                        workoutSet.getOverloadExp(),
+                        prLabels(workoutSet)
                 ));
                 detailBinding.detailContainer.addView(setBinding.getRoot());
             }
@@ -253,6 +252,23 @@ public class ProfileFragment extends Fragment {
             parts.add(pretty(workoutSet.getSetType().name()));
         }
         return String.join(" • ", parts);
+    }
+
+    private String prLabels(WorkoutSet workoutSet) {
+        List<String> labels = new ArrayList<>();
+        if (workoutSet.isWeightPr()) {
+            labels.add("weight PR");
+        }
+        if (workoutSet.isVolumePr()) {
+            labels.add("volume PR");
+        }
+        if (workoutSet.isRepsPr()) {
+            labels.add("reps PR");
+        }
+        if (labels.isEmpty()) {
+            return "no PR";
+        }
+        return String.join(", ", labels);
     }
 
     private String rankLabel(RankTier rankTier) {

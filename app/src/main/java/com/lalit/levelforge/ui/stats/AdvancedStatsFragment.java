@@ -22,6 +22,7 @@ import com.lalit.levelforge.data.local.relation.WorkoutSetWithExercise;
 import com.lalit.levelforge.data.model.ExerciseType;
 import com.lalit.levelforge.databinding.FragmentAdvancedStatsBinding;
 import com.lalit.levelforge.databinding.ItemStatInsightBinding;
+import com.lalit.levelforge.domain.calendar.TrainingCalendar;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -208,6 +209,7 @@ public class AdvancedStatsFragment extends Fragment {
         addCard("Average duration", averageDuration());
         addCard("Average sets", averageSets());
         addCard("Highest EXP workout", bestSession());
+        addCard("PR events", prEventSummary());
         addCard("Suggested focus", suggestedFocus());
     }
 
@@ -304,7 +306,6 @@ public class AdvancedStatsFragment extends Fragment {
     private List<String> overloadEvents(boolean byWeight) {
         Map<Long, WorkoutSession> sessionsById = sessionsById();
         List<WorkoutSetWithExercise> details = chronologicalDetails();
-        Map<Long, Double> bestByExercise = new HashMap<>();
         List<String> events = new ArrayList<>();
 
         for (WorkoutSetWithExercise detail : details) {
@@ -313,20 +314,18 @@ public class AdvancedStatsFragment extends Fragment {
             if (workoutSet == null || exercise == null) {
                 continue;
             }
+            boolean matches = byWeight ? workoutSet.isWeightPr() : workoutSet.isVolumePr();
+            if (!matches) {
+                continue;
+            }
             double value = byWeight ? workoutSet.getWeightKg() : setVolume(workoutSet);
             if (value <= 0) {
                 continue;
             }
-            double previousBest = bestByExercise.containsKey(exercise.getId())
-                    ? bestByExercise.get(exercise.getId())
-                    : 0;
-            if (previousBest > 0 && value > previousBest) {
-                WorkoutSession session = sessionsById.get(workoutSet.getSessionId());
-                String day = session == null ? "" : dayFormat.format(new Date(session.getCompletedAt())) + " • ";
-                String suffix = byWeight ? format(value) + " kg" : formatVolume(value);
-                events.add(day + exercise.getName() + " → " + suffix);
-            }
-            bestByExercise.put(exercise.getId(), Math.max(previousBest, value));
+            WorkoutSession session = sessionsById.get(workoutSet.getSessionId());
+            String day = session == null ? "" : dayFormat.format(new Date(session.getCompletedAt())) + " • ";
+            String suffix = byWeight ? format(value) + " kg" : formatVolume(value);
+            events.add(day + exercise.getName() + " → " + suffix);
         }
         return events;
     }
@@ -423,7 +422,7 @@ public class AdvancedStatsFragment extends Fragment {
         cursor.setTimeInMillis(trainingDays.get(0));
         for (int i = 1; i < trainingDays.size(); i++) {
             cursor.add(Calendar.DATE, -1);
-            if (startOfDay(trainingDays.get(i)) == startOfDay(cursor.getTimeInMillis())) {
+            if (TrainingCalendar.startOfDay(trainingDays.get(i)) == TrainingCalendar.startOfDay(cursor.getTimeInMillis())) {
                 streak++;
             } else {
                 break;
@@ -435,19 +434,9 @@ public class AdvancedStatsFragment extends Fragment {
     private List<Long> uniqueTrainingDays() {
         Map<Long, Boolean> days = new HashMap<>();
         for (WorkoutSession session : latestSessions) {
-            days.put(startOfDay(session.getCompletedAt()), true);
+            days.put(TrainingCalendar.startOfDay(session.getCompletedAt()), true);
         }
         return new ArrayList<>(days.keySet());
-    }
-
-    private long startOfDay(long millis) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(millis);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar.getTimeInMillis();
     }
 
     private String bestWeekday() {
@@ -489,6 +478,31 @@ public class AdvancedStatsFragment extends Fragment {
         }
         return bestSession == null ? getString(R.string.stats_empty_value)
                 : bestSession.getTitle() + " • " + bestSession.getTotalExp() + " EXP";
+    }
+
+    private String prEventSummary() {
+        int weightPrs = 0;
+        int volumePrs = 0;
+        int repsPrs = 0;
+        for (WorkoutSetWithExercise detail : latestSetDetails) {
+            WorkoutSet workoutSet = detail.getWorkoutSet();
+            if (workoutSet == null) {
+                continue;
+            }
+            if (workoutSet.isWeightPr()) {
+                weightPrs++;
+            }
+            if (workoutSet.isVolumePr()) {
+                volumePrs++;
+            }
+            if (workoutSet.isRepsPr()) {
+                repsPrs++;
+            }
+        }
+        if (weightPrs + volumePrs + repsPrs == 0) {
+            return getString(R.string.stats_no_overload);
+        }
+        return weightPrs + " weight • " + volumePrs + " volume • " + repsPrs + " reps";
     }
 
     private String suggestedFocus() {

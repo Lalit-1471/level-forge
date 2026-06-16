@@ -10,6 +10,7 @@ import com.lalit.levelforge.data.model.ExerciseType;
 import com.lalit.levelforge.data.model.SetType;
 import com.lalit.levelforge.data.repo.ExerciseRepository;
 import com.lalit.levelforge.data.repo.WorkoutLogRepository;
+import com.lalit.levelforge.domain.progression.ExpBreakdown;
 import com.lalit.levelforge.domain.progression.ExpCalculator;
 
 import java.util.ArrayList;
@@ -32,6 +33,9 @@ public class WorkoutLoggerViewModel extends ViewModel {
     private final MutableLiveData<Boolean> reviewMode = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> saved = new MutableLiveData<>(false);
     private final Map<Long, Double> historicalBestEffortByExercise = new HashMap<>();
+    private final Map<Long, Double> historicalBestWeightByExercise = new HashMap<>();
+    private final Map<Long, Double> historicalBestVolumeByExercise = new HashMap<>();
+    private final Map<Long, Integer> historicalBestRepsByExercise = new HashMap<>();
     private final long startedAtMillis = System.currentTimeMillis();
 
     @Inject
@@ -253,41 +257,50 @@ public class WorkoutLoggerViewModel extends ViewModel {
 
     private List<LoggedSet> rebuildLoggedSets(Exercise exercise, List<WorkoutSet> workoutSets) {
         List<LoggedSet> rebuiltSets = new ArrayList<>();
+        double bestEffort = historicalBestEffortByExercise.containsKey(exercise.getId())
+                ? historicalBestEffortByExercise.get(exercise.getId())
+                : 0;
+        double bestWeight = historicalBestWeightByExercise.containsKey(exercise.getId())
+                ? historicalBestWeightByExercise.get(exercise.getId())
+                : 0;
+        double bestVolume = historicalBestVolumeByExercise.containsKey(exercise.getId())
+                ? historicalBestVolumeByExercise.get(exercise.getId())
+                : 0;
+        int bestReps = historicalBestRepsByExercise.containsKey(exercise.getId())
+                ? historicalBestRepsByExercise.get(exercise.getId())
+                : 0;
         int setNumber = 1;
         for (WorkoutSet workoutSet : workoutSets) {
             workoutSet.setSetNumber(setNumber);
-            boolean progressiveOverload = isProgressiveOverload(exercise, workoutSet, rebuiltSets);
-            int exp = ExpCalculator.expForSet(exercise, workoutSet, progressiveOverload);
+            double effortScore = effortScore(exercise.getExerciseType(), workoutSet);
+            double setVolume = setVolume(workoutSet);
+            boolean weightPr = workoutSet.getWeightKg() > 0 && bestWeight > 0 && workoutSet.getWeightKg() > bestWeight;
+            boolean volumePr = setVolume > 0 && bestVolume > 0 && setVolume > bestVolume;
+            boolean repsPr = workoutSet.getReps() > 0 && bestReps > 0 && workoutSet.getReps() > bestReps;
+            boolean effortPr = effortScore > 0 && bestEffort > 0 && effortScore > bestEffort;
+            boolean progressiveOverload = workoutSet.getSetType() != SetType.WARMUP
+                    && (weightPr || volumePr || repsPr || effortPr);
+            ExpBreakdown breakdown = ExpCalculator.breakdownForSet(exercise, workoutSet, progressiveOverload);
+            workoutSet.setWeightPr(weightPr);
+            workoutSet.setVolumePr(volumePr);
+            workoutSet.setRepsPr(repsPr);
+            workoutSet.setProgressiveOverload(progressiveOverload);
+            workoutSet.setBaseExp(breakdown.getBaseExp());
+            workoutSet.setEffortExp(breakdown.getEffortExp());
+            workoutSet.setSetTypeExp(breakdown.getSetTypeExp());
+            workoutSet.setOverloadExp(breakdown.getOverloadExp());
+            workoutSet.setTotalExp(breakdown.getTotalExp());
+            int exp = breakdown.getTotalExp();
             rebuiltSets.add(new LoggedSet(exercise, workoutSet, exp));
+            if (workoutSet.getSetType() != SetType.WARMUP) {
+                bestEffort = Math.max(bestEffort, effortScore);
+                bestWeight = Math.max(bestWeight, workoutSet.getWeightKg());
+                bestVolume = Math.max(bestVolume, setVolume);
+                bestReps = Math.max(bestReps, workoutSet.getReps());
+            }
             setNumber++;
         }
         return rebuiltSets;
-    }
-
-    private boolean isProgressiveOverload(Exercise exercise, WorkoutSet candidate, List<LoggedSet> previousSets) {
-        if (candidate.getSetType() == SetType.WARMUP) {
-            return false;
-        }
-
-        ExerciseType exerciseType = exercise.getExerciseType();
-        double candidateScore = effortScore(exerciseType, candidate);
-        if (candidateScore <= 0) {
-            return false;
-        }
-
-        double bestPreviousScore = historicalBestEffortByExercise.containsKey(exercise.getId())
-                ? historicalBestEffortByExercise.get(exercise.getId())
-                : 0;
-        for (LoggedSet previousSet : previousSets) {
-            if (previousSet.getWorkoutSet().getSetType() == SetType.WARMUP) {
-                continue;
-            }
-            bestPreviousScore = Math.max(
-                    bestPreviousScore,
-                    effortScore(exerciseType, previousSet.getWorkoutSet())
-            );
-        }
-        return bestPreviousScore > 0 && candidateScore > bestPreviousScore;
     }
 
     private void loadHistoricalBestEffort(Exercise exercise) {
@@ -296,13 +309,22 @@ public class WorkoutLoggerViewModel extends ViewModel {
         }
         workoutLogRepository.getCompletedSetsForExercise(exercise.getId(), (exerciseId, sets) -> {
             double bestScore = 0;
+            double bestWeight = 0;
+            double bestVolume = 0;
+            int bestReps = 0;
             for (WorkoutSet workoutSet : sets) {
                 if (workoutSet.getSetType() == SetType.WARMUP) {
                     continue;
                 }
                 bestScore = Math.max(bestScore, effortScore(exercise.getExerciseType(), workoutSet));
+                bestWeight = Math.max(bestWeight, workoutSet.getWeightKg());
+                bestVolume = Math.max(bestVolume, setVolume(workoutSet));
+                bestReps = Math.max(bestReps, workoutSet.getReps());
             }
             historicalBestEffortByExercise.put(exerciseId, bestScore);
+            historicalBestWeightByExercise.put(exerciseId, bestWeight);
+            historicalBestVolumeByExercise.put(exerciseId, bestVolume);
+            historicalBestRepsByExercise.put(exerciseId, bestReps);
             List<LoggedExercise> rebuiltExercises = rebuildExerciseExp(safeLoggedExercises());
             loggedExercises.setValue(rebuiltExercises);
             totalExp.setValue(sumExp(rebuiltExercises));
@@ -350,6 +372,10 @@ public class WorkoutLoggerViewModel extends ViewModel {
             default:
                 return 0;
         }
+    }
+
+    private double setVolume(WorkoutSet workoutSet) {
+        return workoutSet.getWeightKg() * Math.max(1, workoutSet.getReps());
     }
 
     private int sumExp(List<LoggedExercise> exercises) {

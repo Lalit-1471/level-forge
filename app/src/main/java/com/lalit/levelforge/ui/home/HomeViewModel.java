@@ -9,6 +9,7 @@ import com.lalit.levelforge.data.local.entity.UserProfile;
 import com.lalit.levelforge.data.local.entity.WorkoutSession;
 import com.lalit.levelforge.data.repo.ExerciseRepository;
 import com.lalit.levelforge.data.repo.ProgressionRepository;
+import com.lalit.levelforge.data.repo.QuestRepository;
 import com.lalit.levelforge.data.repo.UserProfileRepository;
 import com.lalit.levelforge.data.repo.WorkoutRepository;
 import com.lalit.levelforge.domain.progression.LevelCurve;
@@ -33,9 +34,11 @@ public class HomeViewModel extends ViewModel {
     public HomeViewModel(WorkoutRepository workoutRepository,
                          UserProfileRepository userProfileRepository,
                          ProgressionRepository progressionRepository,
-                         ExerciseRepository exerciseRepository) {
+                         ExerciseRepository exerciseRepository,
+                         QuestRepository questRepository) {
         progressionRepository.initializeLevelStateIfNeeded();
         exerciseRepository.seedDefaultExercises();
+        questRepository.seedDefaultQuestDefinitions();
 
         LiveData<List<WorkoutSession>> recentSessions = workoutRepository.getRecentSessions();
         LiveData<UserProfile> profile = userProfileRepository.observeProfile();

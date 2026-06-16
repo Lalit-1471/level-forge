@@ -102,7 +102,7 @@
     <string name="profile_workout_detail_loading">Loading workout details...</string>
     <string name="profile_workout_detail_summary">%1$d sets • %2$s volume • %3$d saved EXP</string>
     <string name="profile_detail_set_exp">%1$d EXP</string>
-    <string name="profile_detail_exp_breakdown">Base %1$d • Effort +%2$d • Set type %3$+d</string>
+    <string name="profile_detail_exp_breakdown">Base %1$d • Effort +%2$d • Set type %3$+d • Overload +%4$d • %5$s</string>
     <string name="stats_title">Stats</string>
     <string name="stats_subtitle">Training trends, best efforts, and workout momentum.</string>
     <string name="stats_open_advanced">Open advanced stats</string>

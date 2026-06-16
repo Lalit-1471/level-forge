@@ -43,6 +43,15 @@ public class WorkoutSet {
     private double distanceMeters;
     private double assistanceKg;
     private boolean completed;
+    private int baseExp;
+    private int effortExp;
+    private int setTypeExp;
+    private int overloadExp;
+    private int totalExp;
+    private boolean progressiveOverload;
+    private boolean weightPr;
+    private boolean volumePr;
+    private boolean repsPr;
 
     public WorkoutSet() {
     }
@@ -133,5 +142,77 @@ public class WorkoutSet {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public int getBaseExp() {
+        return baseExp;
+    }
+
+    public void setBaseExp(int baseExp) {
+        this.baseExp = baseExp;
+    }
+
+    public int getEffortExp() {
+        return effortExp;
+    }
+
+    public void setEffortExp(int effortExp) {
+        this.effortExp = effortExp;
+    }
+
+    public int getSetTypeExp() {
+        return setTypeExp;
+    }
+
+    public void setSetTypeExp(int setTypeExp) {
+        this.setTypeExp = setTypeExp;
+    }
+
+    public int getOverloadExp() {
+        return overloadExp;
+    }
+
+    public void setOverloadExp(int overloadExp) {
+        this.overloadExp = overloadExp;
+    }
+
+    public int getTotalExp() {
+        return totalExp;
+    }
+
+    public void setTotalExp(int totalExp) {
+        this.totalExp = totalExp;
+    }
+
+    public boolean isProgressiveOverload() {
+        return progressiveOverload;
+    }
+
+    public void setProgressiveOverload(boolean progressiveOverload) {
+        this.progressiveOverload = progressiveOverload;
+    }
+
+    public boolean isWeightPr() {
+        return weightPr;
+    }
+
+    public void setWeightPr(boolean weightPr) {
+        this.weightPr = weightPr;
+    }
+
+    public boolean isVolumePr() {
+        return volumePr;
+    }
+
+    public void setVolumePr(boolean volumePr) {
+        this.volumePr = volumePr;
+    }
+
+    public boolean isRepsPr() {
+        return repsPr;
+    }
+
+    public void setRepsPr(boolean repsPr) {
+        this.repsPr = repsPr;
     }
 }
