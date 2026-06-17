@@ -11,6 +11,8 @@ import com.lalit.levelforge.data.local.dao.ExpEventDao;
 import com.lalit.levelforge.data.local.dao.LevelStateDao;
 import com.lalit.levelforge.data.local.dao.ProgressionEventDao;
 import com.lalit.levelforge.data.local.dao.QuestDefinitionDao;
+import com.lalit.levelforge.data.local.dao.QuestObjectiveDao;
+import com.lalit.levelforge.data.local.dao.QuestObjectiveProgressDao;
 import com.lalit.levelforge.data.local.dao.QuestProgressDao;
 import com.lalit.levelforge.data.local.dao.StreakStateDao;
 import com.lalit.levelforge.data.local.dao.UserProfileDao;
@@ -36,7 +38,9 @@ public final class AppModule {
     @Singleton
     static AppDatabase provideDatabase(@ApplicationContext Context context) {
         return Room.databaseBuilder(context, AppDatabase.class, "levelforge.db")
-                .addMigrations(DatabaseMigrations.MIGRATION_3_4, DatabaseMigrations.MIGRATION_4_5)
+                .addMigrations(DatabaseMigrations.MIGRATION_3_4,
+                        DatabaseMigrations.MIGRATION_4_5,
+                        DatabaseMigrations.MIGRATION_5_6)
                 .fallbackToDestructiveMigration()
                 .build();
     }
@@ -69,6 +73,16 @@ public final class AppModule {
     @Provides
     static QuestDefinitionDao provideQuestDefinitionDao(AppDatabase appDatabase) {
         return appDatabase.questDefinitionDao();
+    }
+
+    @Provides
+    static QuestObjectiveDao provideQuestObjectiveDao(AppDatabase appDatabase) {
+        return appDatabase.questObjectiveDao();
+    }
+
+    @Provides
+    static QuestObjectiveProgressDao provideQuestObjectiveProgressDao(AppDatabase appDatabase) {
+        return appDatabase.questObjectiveProgressDao();
     }
 
     @Provides

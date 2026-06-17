@@ -15,7 +15,13 @@ public final class QuestEngine {
         if (definition == null || event == null || definition.getMetricType() == null) {
             return false;
         }
-        QuestMetricType metricType = definition.getMetricType();
+        return eventContributesToMetric(definition.getMetricType(), event);
+    }
+
+    public static boolean eventContributesToMetric(QuestMetricType metricType, ProgressionEvent event) {
+        if (metricType == null || event == null) {
+            return false;
+        }
         ProgressionEventType eventType = event.getEventType();
         switch (metricType) {
             case LOGIN:

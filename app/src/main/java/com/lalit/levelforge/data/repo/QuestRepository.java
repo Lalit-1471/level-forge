@@ -6,12 +6,16 @@ import com.lalit.levelforge.data.local.dao.ExpEventDao;
 import com.lalit.levelforge.data.local.dao.LevelStateDao;
 import com.lalit.levelforge.data.local.dao.ProgressionEventDao;
 import com.lalit.levelforge.data.local.dao.QuestDefinitionDao;
+import com.lalit.levelforge.data.local.dao.QuestObjectiveDao;
+import com.lalit.levelforge.data.local.dao.QuestObjectiveProgressDao;
 import com.lalit.levelforge.data.local.dao.QuestProgressDao;
 import com.lalit.levelforge.data.local.dao.StreakStateDao;
 import com.lalit.levelforge.data.local.entity.ExpEvent;
 import com.lalit.levelforge.data.local.entity.LevelState;
 import com.lalit.levelforge.data.local.entity.ProgressionEvent;
 import com.lalit.levelforge.data.local.entity.QuestDefinition;
+import com.lalit.levelforge.data.local.entity.QuestObjective;
+import com.lalit.levelforge.data.local.entity.QuestObjectiveProgress;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
 import com.lalit.levelforge.data.local.entity.StreakState;
 import com.lalit.levelforge.data.model.ExpSourceType;
@@ -38,6 +42,8 @@ import javax.inject.Singleton;
 public class QuestRepository {
 
     private final QuestDefinitionDao questDefinitionDao;
+    private final QuestObjectiveDao questObjectiveDao;
+    private final QuestObjectiveProgressDao questObjectiveProgressDao;
     private final QuestProgressDao questProgressDao;
     private final ProgressionEventDao progressionEventDao;
     private final ExpEventDao expEventDao;
@@ -47,12 +53,16 @@ public class QuestRepository {
 
     @Inject
     public QuestRepository(QuestDefinitionDao questDefinitionDao,
+                           QuestObjectiveDao questObjectiveDao,
+                           QuestObjectiveProgressDao questObjectiveProgressDao,
                            QuestProgressDao questProgressDao,
                            ProgressionEventDao progressionEventDao,
                            ExpEventDao expEventDao,
                            LevelStateDao levelStateDao,
                            StreakStateDao streakStateDao) {
         this.questDefinitionDao = questDefinitionDao;
+        this.questObjectiveDao = questObjectiveDao;
+        this.questObjectiveProgressDao = questObjectiveProgressDao;
         this.questProgressDao = questProgressDao;
         this.progressionEventDao = progressionEventDao;
         this.expEventDao = expEventDao;
@@ -68,12 +78,23 @@ public class QuestRepository {
         return questProgressDao.observeProgressForPeriod(periodStartMillis);
     }
 
+    public LiveData<List<QuestObjective>> observeQuestObjectives() {
+        return questObjectiveDao.observeObjectives();
+    }
+
+    public LiveData<List<QuestObjectiveProgress>> observeObjectiveProgressForPeriod(long periodStartMillis) {
+        return questObjectiveProgressDao.observeProgressForPeriod(periodStartMillis);
+    }
+
     public LiveData<StreakState> observeStreakState() {
         return streakStateDao.observeStreakState();
     }
 
     public void seedDefaultQuestDefinitions() {
-        diskExecutor.execute(() -> questDefinitionDao.upsertAll(defaultDefinitions()));
+        diskExecutor.execute(() -> {
+            questDefinitionDao.upsertAll(defaultDefinitions());
+            questObjectiveDao.upsertAll(defaultBossObjectives());
+        });
     }
 
     public void applyProgressionEvent(ProgressionEvent event) {
@@ -116,9 +137,9 @@ public class QuestRepository {
                 return;
             }
 
-            ExpSourceType sourceType = definition.getResetType() == QuestResetType.WEEKLY
-                    ? ExpSourceType.WEEKLY_TASK
-                    : ExpSourceType.DAILY_TASK;
+            ExpSourceType sourceType = definition.getResetType() == QuestResetType.DAILY
+                    ? ExpSourceType.DAILY_TASK
+                    : ExpSourceType.WEEKLY_TASK;
             expEventDao.insert(new ExpEvent(
                     sourceType,
                     progress.getId(),
@@ -136,6 +157,10 @@ public class QuestRepository {
     private void applyProgressionEventOnDisk(ProgressionEvent event, long now) {
         List<QuestDefinition> definitions = questDefinitionDao.getActiveDefinitions();
         for (QuestDefinition definition : definitions) {
+            if (definition.getRarity() == QuestRarity.BOSS) {
+                applyBossObjectiveProgress(definition, event, now);
+                continue;
+            }
             if (!QuestEngine.eventContributesToQuest(definition, event)) {
                 continue;
             }
@@ -151,9 +176,75 @@ public class QuestRepository {
         }
     }
 
+    private void applyBossObjectiveProgress(QuestDefinition definition, ProgressionEvent event, long now) {
+        List<QuestObjective> objectives = questObjectiveDao.getObjectivesForQuest(definition.getId());
+        if (objectives.isEmpty()) {
+            return;
+        }
+        long periodStartMillis = periodStartFor(definition.getResetType(), event.getCreatedAt());
+        boolean objectiveChanged = false;
+        for (QuestObjective objective : objectives) {
+            if (!QuestEngine.eventContributesToMetric(objective.getMetricType(), event)) {
+                continue;
+            }
+            QuestObjectiveProgress existingProgress = questObjectiveProgressDao.getProgress(
+                    objective.getId(),
+                    periodStartMillis
+            );
+            QuestObjectiveProgress nextProgress = existingProgress == null
+                    ? new QuestObjectiveProgress(
+                    objective.getId(),
+                    definition.getId(),
+                    periodStartMillis,
+                    0,
+                    false,
+                    now
+            )
+                    : existingProgress;
+            int targetCount = Math.max(1, objective.getTargetCount());
+            int nextCount = Math.min(targetCount, nextProgress.getProgressCount() + 1);
+            nextProgress.setProgressCount(nextCount);
+            nextProgress.setCompleted(nextCount >= targetCount);
+            nextProgress.setUpdatedAt(now);
+            questObjectiveProgressDao.upsert(nextProgress);
+            objectiveChanged = true;
+        }
+        if (objectiveChanged) {
+            syncBossQuestProgress(definition, objectives, periodStartMillis, now);
+        }
+    }
+
+    private void syncBossQuestProgress(QuestDefinition definition, List<QuestObjective> objectives,
+                                       long periodStartMillis, long now) {
+        int completedObjectives = 0;
+        for (QuestObjective objective : objectives) {
+            QuestObjectiveProgress progress = questObjectiveProgressDao.getProgress(
+                    objective.getId(),
+                    periodStartMillis
+            );
+            if (progress != null && progress.isCompleted()) {
+                completedObjectives++;
+            }
+        }
+
+        QuestProgress existingProgress = questProgressDao.getProgress(definition.getId(), periodStartMillis);
+        boolean alreadyClaimed = existingProgress != null && existingProgress.isRewardClaimed();
+        QuestProgress nextProgress = existingProgress == null
+                ? new QuestProgress(definition.getId(), periodStartMillis, 0, false, false, now)
+                : existingProgress;
+        nextProgress.setProgressCount(completedObjectives);
+        nextProgress.setCompleted(completedObjectives >= objectives.size());
+        nextProgress.setRewardClaimed(alreadyClaimed);
+        nextProgress.setUpdatedAt(now);
+        questProgressDao.upsert(nextProgress);
+    }
+
     private long periodStartFor(QuestResetType resetType, long eventTimeMillis) {
         if (resetType == QuestResetType.WEEKLY) {
             return TrainingCalendar.startOfWeek(eventTimeMillis);
+        }
+        if (resetType == QuestResetType.BIWEEKLY) {
+            return TrainingCalendar.startOfBiweek(eventTimeMillis);
         }
         if (resetType == QuestResetType.ONCE) {
             return 0;
@@ -388,7 +479,7 @@ public class QuestRepository {
                 "weekly_five_overloads",
                 "Overload raid",
                 "Trigger progressive overload five times this week.",
-                QuestRarity.BOSS,
+                QuestRarity.EPIC,
                 QuestResetType.WEEKLY,
                 QuestMetricType.PROGRESSIVE_OVERLOAD,
                 5,
@@ -436,7 +527,102 @@ public class QuestRepository {
                 true,
                 130
         ));
+        definitions.add(new QuestDefinition(
+                "boss_ascension_trial",
+                "The Ascension Trial",
+                "A 7-day boss trial built around consistency, overload, and showing up.",
+                QuestRarity.BOSS,
+                QuestResetType.WEEKLY,
+                QuestMetricType.WORKOUT_POSTED,
+                4,
+                QuestRewardType.EXP,
+                650,
+                true,
+                500
+        ));
+        definitions.add(new QuestDefinition(
+                "boss_raid_trial",
+                "The Raid",
+                "A 14-day discipline raid with high volume, logins, and repeated pressure.",
+                QuestRarity.BOSS,
+                QuestResetType.BIWEEKLY,
+                QuestMetricType.WORKOUT_POSTED,
+                4,
+                QuestRewardType.EXP,
+                1100,
+                true,
+                510
+        ));
         return definitions;
+    }
+
+    private List<QuestObjective> defaultBossObjectives() {
+        List<QuestObjective> objectives = new ArrayList<>();
+        objectives.add(new QuestObjective(
+                "boss_ascension_workouts",
+                "boss_ascension_trial",
+                "Complete 4 workouts",
+                QuestMetricType.WORKOUT_POSTED,
+                4,
+                10
+        ));
+        objectives.add(new QuestObjective(
+                "boss_ascension_sets",
+                "boss_ascension_trial",
+                "Complete 24 total sets",
+                QuestMetricType.SETS_COMPLETED,
+                24,
+                20
+        ));
+        objectives.add(new QuestObjective(
+                "boss_ascension_overloads",
+                "boss_ascension_trial",
+                "Hit 2 progressive overloads",
+                QuestMetricType.PROGRESSIVE_OVERLOAD,
+                2,
+                30
+        ));
+        objectives.add(new QuestObjective(
+                "boss_ascension_logins",
+                "boss_ascension_trial",
+                "Claim 5 daily login gates",
+                QuestMetricType.LOGIN,
+                5,
+                40
+        ));
+        objectives.add(new QuestObjective(
+                "boss_raid_workouts",
+                "boss_raid_trial",
+                "Complete 6 workouts",
+                QuestMetricType.WORKOUT_POSTED,
+                6,
+                100
+        ));
+        objectives.add(new QuestObjective(
+                "boss_raid_sets",
+                "boss_raid_trial",
+                "Complete 80 total sets",
+                QuestMetricType.SETS_COMPLETED,
+                80,
+                110
+        ));
+        objectives.add(new QuestObjective(
+                "boss_raid_overloads",
+                "boss_raid_trial",
+                "Hit 5 progressive overloads",
+                QuestMetricType.PROGRESSIVE_OVERLOAD,
+                5,
+                120
+        ));
+        objectives.add(new QuestObjective(
+                "boss_raid_logins",
+                "boss_raid_trial",
+                "Open Level Forge on 10 days",
+                QuestMetricType.LOGIN,
+                10,
+                130
+        ));
+        return objectives;
     }
 
     private void updateLoginStreak(long todayStart, long now) {

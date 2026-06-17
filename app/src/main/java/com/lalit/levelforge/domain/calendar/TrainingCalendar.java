@@ -33,6 +33,15 @@ public final class TrainingCalendar {
         return startOfWeek(millis) + TimeUnit.DAYS.toMillis(7);
     }
 
+    public static long startOfBiweek(long millis) {
+        long weekStart = startOfWeek(millis);
+        long weekIndex = TimeUnit.MILLISECONDS.toDays(weekStart) / 7;
+        if (weekIndex % 2 == 0) {
+            return weekStart;
+        }
+        return weekStart - TimeUnit.DAYS.toMillis(7);
+    }
+
     public static boolean isSameDay(long firstMillis, long secondMillis) {
         return startOfDay(firstMillis) == startOfDay(secondMillis);
     }

@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.lalit.levelforge.data.local.entity.QuestDefinition;
+import com.lalit.levelforge.data.local.entity.QuestObjective;
+import com.lalit.levelforge.data.local.entity.QuestObjectiveProgress;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
 import com.lalit.levelforge.data.local.entity.StreakState;
 import com.lalit.levelforge.data.repo.QuestRepository;
@@ -21,6 +23,7 @@ public class QuestViewModel extends ViewModel {
     private final QuestRepository questRepository;
     private final long todayStartMillis;
     private final long weekStartMillis;
+    private final long biweekStartMillis;
 
     @Inject
     public QuestViewModel(QuestRepository questRepository) {
@@ -28,6 +31,7 @@ public class QuestViewModel extends ViewModel {
         long now = System.currentTimeMillis();
         todayStartMillis = TrainingCalendar.startOfDay(now);
         weekStartMillis = TrainingCalendar.startOfWeek(now);
+        biweekStartMillis = TrainingCalendar.startOfBiweek(now);
         questRepository.seedDefaultQuestDefinitions();
         questRepository.recordDailyLogin();
     }
@@ -44,6 +48,22 @@ public class QuestViewModel extends ViewModel {
         return questRepository.observeProgressForPeriod(weekStartMillis);
     }
 
+    public LiveData<List<QuestProgress>> getBiweeklyProgress() {
+        return questRepository.observeProgressForPeriod(biweekStartMillis);
+    }
+
+    public LiveData<List<QuestObjective>> getQuestObjectives() {
+        return questRepository.observeQuestObjectives();
+    }
+
+    public LiveData<List<QuestObjectiveProgress>> getWeeklyObjectiveProgress() {
+        return questRepository.observeObjectiveProgressForPeriod(weekStartMillis);
+    }
+
+    public LiveData<List<QuestObjectiveProgress>> getBiweeklyObjectiveProgress() {
+        return questRepository.observeObjectiveProgressForPeriod(biweekStartMillis);
+    }
+
     public LiveData<StreakState> getStreakState() {
         return questRepository.observeStreakState();
     }
@@ -54,6 +74,10 @@ public class QuestViewModel extends ViewModel {
 
     public long getWeekStartMillis() {
         return weekStartMillis;
+    }
+
+    public long getBiweekStartMillis() {
+        return biweekStartMillis;
     }
 
     public void claimReward(String questId, long periodStartMillis) {

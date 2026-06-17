@@ -157,9 +157,11 @@
     <string name="quests_shield_earn">Earn 1 streak shield every 7-day streak. Max 2 shields.</string>
     <string name="quests_daily_section">Daily gates</string>
     <string name="quests_weekly_section">Weekly raids</string>
+    <string name="quests_boss_section">Boss trials</string>
     <string name="quests_empty">Quest board is preparing. Check back in a moment.</string>
     <string name="quests_card_meta">%1$s • %2$s</string>
     <string name="quests_card_progress">%1$d/%2$d</string>
+    <string name="quests_objective_progress">%1$s • %2$d/%3$d</string>
     <string name="quests_reward_exp">+%1$d EXP</string>
     <string name="quests_reward_title">Title reward</string>
     <string name="quests_state_active">ACTIVE</string>

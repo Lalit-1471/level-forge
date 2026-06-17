@@ -10,6 +10,8 @@ import com.lalit.levelforge.data.local.dao.ExpEventDao;
 import com.lalit.levelforge.data.local.dao.LevelStateDao;
 import com.lalit.levelforge.data.local.dao.ProgressionEventDao;
 import com.lalit.levelforge.data.local.dao.QuestDefinitionDao;
+import com.lalit.levelforge.data.local.dao.QuestObjectiveDao;
+import com.lalit.levelforge.data.local.dao.QuestObjectiveProgressDao;
 import com.lalit.levelforge.data.local.dao.QuestProgressDao;
 import com.lalit.levelforge.data.local.dao.StreakStateDao;
 import com.lalit.levelforge.data.local.dao.UserProfileDao;
@@ -20,6 +22,8 @@ import com.lalit.levelforge.data.local.entity.ExpEvent;
 import com.lalit.levelforge.data.local.entity.LevelState;
 import com.lalit.levelforge.data.local.entity.ProgressionEvent;
 import com.lalit.levelforge.data.local.entity.QuestDefinition;
+import com.lalit.levelforge.data.local.entity.QuestObjective;
+import com.lalit.levelforge.data.local.entity.QuestObjectiveProgress;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
 import com.lalit.levelforge.data.local.entity.StreakState;
 import com.lalit.levelforge.data.local.entity.UserProfile;
@@ -34,12 +38,14 @@ import com.lalit.levelforge.data.local.entity.WorkoutSet;
                 ExpEvent.class,
                 ProgressionEvent.class,
                 QuestDefinition.class,
+                QuestObjective.class,
+                QuestObjectiveProgress.class,
                 QuestProgress.class,
                 StreakState.class,
                 LevelState.class,
                 UserProfile.class
         },
-        version = 5,
+        version = 6,
         exportSchema = true
 )
 @TypeConverters(RoomConverters.class)
@@ -55,6 +61,10 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ProgressionEventDao progressionEventDao();
 
     public abstract QuestDefinitionDao questDefinitionDao();
+
+    public abstract QuestObjectiveDao questObjectiveDao();
+
+    public abstract QuestObjectiveProgressDao questObjectiveProgressDao();
 
     public abstract QuestProgressDao questProgressDao();
 

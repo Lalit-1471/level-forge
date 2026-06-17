@@ -1,6 +1,7 @@
 package com.lalit.levelforge.domain.quest;
 
 import com.lalit.levelforge.data.local.entity.QuestDefinition;
+import com.lalit.levelforge.data.model.QuestRarity;
 import com.lalit.levelforge.data.model.QuestResetType;
 
 import java.util.ArrayList;
@@ -39,12 +40,37 @@ public final class QuestRotation {
     public static List<QuestDefinition> visibleWeeklyQuests(List<QuestDefinition> definitions,
                                                             long weekStartMillis) {
         return rotatingSlice(
-                definitionsFor(definitions, QuestResetType.WEEKLY),
+                nonBossDefinitions(definitionsFor(definitions, QuestResetType.WEEKLY)),
                 weekStartMillis,
                 WEEKLY_VISIBLE_COUNT,
                 7,
                 WEEKLY_VISIBLE_COUNT
         );
+    }
+
+    public static List<QuestDefinition> visibleBossQuests(List<QuestDefinition> definitions,
+                                                          long weekStartMillis,
+                                                          long biweekStartMillis) {
+        List<QuestDefinition> bossDefinitions = new ArrayList<>();
+        for (QuestDefinition definition : definitionsFor(definitions, QuestResetType.WEEKLY)) {
+            if (definition.getRarity() == QuestRarity.BOSS) {
+                bossDefinitions.add(definition);
+            }
+        }
+        for (QuestDefinition definition : definitionsFor(definitions, QuestResetType.BIWEEKLY)) {
+            if (definition.getRarity() == QuestRarity.BOSS) {
+                bossDefinitions.add(definition);
+            }
+        }
+        bossDefinitions.sort(Comparator.comparingInt(QuestDefinition::getSortOrder));
+        return bossDefinitions;
+    }
+
+    public static long periodStartFor(QuestDefinition definition, long weekStartMillis, long biweekStartMillis) {
+        if (definition != null && definition.getResetType() == QuestResetType.BIWEEKLY) {
+            return biweekStartMillis;
+        }
+        return weekStartMillis;
     }
 
     private static List<QuestDefinition> definitionsFor(List<QuestDefinition> definitions,
@@ -59,6 +85,16 @@ public final class QuestRotation {
             }
         }
         filtered.sort(Comparator.comparingInt(QuestDefinition::getSortOrder));
+        return filtered;
+    }
+
+    private static List<QuestDefinition> nonBossDefinitions(List<QuestDefinition> definitions) {
+        List<QuestDefinition> filtered = new ArrayList<>();
+        for (QuestDefinition definition : definitions) {
+            if (definition.getRarity() != QuestRarity.BOSS) {
+                filtered.add(definition);
+            }
+        }
         return filtered;
     }
 
