@@ -24,6 +24,9 @@ public interface ExerciseDao {
     @Query("SELECT COUNT(*) FROM exercises")
     int countExercises();
 
+    @Query("SELECT * FROM exercises WHERE id = :exerciseId LIMIT 1")
+    Exercise getExerciseById(long exerciseId);
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertDefaults(List<Exercise> exercises);
 

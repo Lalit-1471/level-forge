@@ -14,12 +14,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.lalit.levelforge.R;
 import com.lalit.levelforge.data.local.entity.Exercise;
+import com.lalit.levelforge.data.local.entity.Routine;
+import com.lalit.levelforge.data.local.entity.WorkoutSet;
 import com.lalit.levelforge.data.model.ExerciseType;
 import com.lalit.levelforge.data.model.MuscleGroup;
 import com.lalit.levelforge.data.model.SetType;
@@ -43,6 +46,7 @@ public class WorkoutLoggerFragment extends Fragment {
     private final Handler timerHandler = new Handler(Looper.getMainLooper());
     private final List<Exercise> allExercises = new ArrayList<>();
     private final List<Exercise> visibleExercises = new ArrayList<>();
+    private final List<Routine> latestRoutines = new ArrayList<>();
     private List<LoggedExercise> latestLoggedExercises = new ArrayList<>();
     private long editingExerciseId = -1L;
     private int editingSetIndex = -1;
@@ -73,6 +77,12 @@ public class WorkoutLoggerFragment extends Fragment {
         timerHandler.post(timerRunnable);
 
         viewModel.getExercises().observe(getViewLifecycleOwner(), this::renderExercisePicker);
+        viewModel.getRoutines().observe(getViewLifecycleOwner(), routines -> {
+            latestRoutines.clear();
+            if (routines != null) {
+                latestRoutines.addAll(routines);
+            }
+        });
         viewModel.getLoggedExercises().observe(getViewLifecycleOwner(), this::renderWorkout);
         viewModel.getTotalExp().observe(getViewLifecycleOwner(), exp -> {
             lastTotalExp = exp == null ? 0 : exp;
@@ -96,8 +106,15 @@ public class WorkoutLoggerFragment extends Fragment {
                 Navigation.findNavController(requireView()).popBackStack();
             }
         });
+        viewModel.getRoutineSaved().observe(getViewLifecycleOwner(), saved -> {
+            if (saved != null && saved) {
+                Toast.makeText(requireContext(), R.string.workout_routine_saved, Toast.LENGTH_SHORT).show();
+                viewModel.consumeRoutineSaved();
+            }
+        });
 
         binding.addExerciseButton.setOnClickListener(v -> showPicker());
+        binding.startRoutineButton.setOnClickListener(v -> showRoutinePicker());
         binding.cancelPickerButton.setOnClickListener(v -> showWorkout());
         binding.discardWorkoutButtonInline.setOnClickListener(v -> {
             viewModel.discardWorkout();
@@ -120,7 +137,15 @@ public class WorkoutLoggerFragment extends Fragment {
             }
         });
         binding.finishWorkoutButton.setOnClickListener(v -> finishWorkout());
-        binding.postWorkoutButton.setOnClickListener(v -> viewModel.postWorkout("Workout", elapsedSeconds()));
+        binding.postWorkoutButton.setOnClickListener(v -> viewModel.postWorkout(
+                workoutTitle(),
+                workoutNotes(),
+                elapsedSeconds()
+        ));
+        binding.saveRoutineButton.setOnClickListener(v -> viewModel.saveCurrentAsRoutine(
+                workoutTitle(),
+                workoutNotes()
+        ));
         binding.discardWorkoutButton.setOnClickListener(v -> {
             viewModel.discardWorkout();
             Navigation.findNavController(v).popBackStack();
@@ -204,10 +229,14 @@ public class WorkoutLoggerFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(requireContext());
         int index = 0;
         for (LoggedSet loggedSet : loggedExercise.getSets()) {
+            if (!interactive && !loggedSet.getWorkoutSet().isCompleted()) {
+                index++;
+                continue;
+            }
             if (interactive
                     && editingExerciseId == loggedExercise.getExercise().getId()
                     && editingSetIndex == index) {
-                renderEditor(itemBinding.setContainer, loggedExercise.getExercise(), loggedSet);
+                renderEditor(itemBinding.setContainer, loggedExercise.getExercise(), loggedSet, index);
                 index++;
                 continue;
             }
@@ -215,7 +244,13 @@ public class WorkoutLoggerFragment extends Fragment {
             ItemLoggedSetBinding setBinding = ItemLoggedSetBinding.inflate(inflater, itemBinding.setContainer, false);
             setBinding.loggedSetTitle.setText(setLabel(loggedSet));
             setBinding.loggedSetDetails.setText(setDetails(loggedSet));
-            setBinding.loggedSetExp.setText("✓ " + loggedSet.getExp() + " EXP");
+            if (loggedSet.getWorkoutSet().isCompleted()) {
+                setBinding.getRoot().setBackgroundResource(R.drawable.bg_completed_set);
+                setBinding.loggedSetExp.setText("✓ " + loggedSet.getExp() + " EXP");
+            } else {
+                setBinding.getRoot().setBackgroundResource(R.drawable.bg_planned_set);
+                setBinding.loggedSetExp.setText("○ " + loggedSet.getExp() + " EXP");
+            }
             int setIndex = index;
             if (interactive) {
                 setBinding.getRoot().setOnClickListener(v -> {
@@ -235,14 +270,21 @@ public class WorkoutLoggerFragment extends Fragment {
         if (interactive
                 && editingExerciseId == loggedExercise.getExercise().getId()
                 && editingSetIndex == -1) {
-            renderEditor(itemBinding.setContainer, loggedExercise.getExercise(), null);
+            renderEditor(itemBinding.setContainer, loggedExercise.getExercise(), null, loggedExercise.getSets().size());
         }
     }
 
-    private void renderEditor(ViewGroup parent, Exercise exercise, LoggedSet existingSet) {
+    private void renderEditor(ViewGroup parent, Exercise exercise, LoggedSet existingSet, int hintSetIndex) {
         ItemSetEditorBinding editorBinding = ItemSetEditorBinding.inflate(LayoutInflater.from(requireContext()), parent, false);
         setupSetTypeSpinner(editorBinding);
         configureEditorFields(editorBinding, exercise.getExerciseType());
+        WorkoutSet previousSet = viewModel.getPreviousSet(exercise.getId(), hintSetIndex);
+        if (previousSet != null) {
+            editorBinding.previousSetHint.setVisibility(View.VISIBLE);
+            editorBinding.previousSetHint.setText(getString(R.string.workout_previous_set, setDetails(previousSet)));
+        } else {
+            editorBinding.previousSetHint.setVisibility(View.GONE);
+        }
         if (existingSet != null) {
             prefillEditor(editorBinding, existingSet);
         }
@@ -370,9 +412,32 @@ public class WorkoutLoggerFragment extends Fragment {
     private void showReview() {
         renderReviewExercises();
         updateReviewSummary();
+        if (binding.workoutTitleInput.getText().toString().trim().isEmpty()) {
+            binding.workoutTitleInput.setText("Workout");
+        }
         binding.workoutContent.setVisibility(View.GONE);
         binding.pickerContent.setVisibility(View.GONE);
         binding.reviewContent.setVisibility(View.VISIBLE);
+    }
+
+    private void showRoutinePicker() {
+        if (latestRoutines.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.workout_no_routines, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String[] titles = new String[latestRoutines.size()];
+        for (int i = 0; i < latestRoutines.size(); i++) {
+            String title = latestRoutines.get(i).getTitle();
+            titles[i] = title == null || title.trim().isEmpty() ? "Saved routine" : title;
+        }
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.workout_start_routine)
+                .setItems(titles, (dialog, which) -> {
+                    editingExerciseId = -1L;
+                    editingSetIndex = -1;
+                    viewModel.startRoutine(latestRoutines.get(which).getId());
+                })
+                .show();
     }
 
     private void updateTimer() {
@@ -432,9 +497,13 @@ public class WorkoutLoggerFragment extends Fragment {
     }
 
     private String setDetails(LoggedSet loggedSet) {
+        return setDetails(loggedSet.getWorkoutSet());
+    }
+
+    private String setDetails(WorkoutSet workoutSet) {
         List<String> parts = new ArrayList<>();
-        int reps = loggedSet.getWorkoutSet().getReps();
-        double weightKg = loggedSet.getWorkoutSet().getWeightKg();
+        int reps = workoutSet.getReps();
+        double weightKg = workoutSet.getWeightKg();
         if (weightKg > 0 && reps > 0) {
             parts.add(format(weightKg) + " kg x " + reps);
         } else {
@@ -445,20 +514,31 @@ public class WorkoutLoggerFragment extends Fragment {
                 parts.add(reps + " reps");
             }
         }
-        if (loggedSet.getWorkoutSet().getDurationSeconds() > 0) {
-            parts.add(loggedSet.getWorkoutSet().getDurationSeconds() + " sec");
+        if (workoutSet.getDurationSeconds() > 0) {
+            parts.add(workoutSet.getDurationSeconds() + " sec");
         }
-        if (loggedSet.getWorkoutSet().getDistanceMeters() > 0) {
-            parts.add(format(loggedSet.getWorkoutSet().getDistanceMeters()) + " m");
+        if (workoutSet.getDistanceMeters() > 0) {
+            parts.add(format(workoutSet.getDistanceMeters()) + " m");
         }
-        if (loggedSet.getWorkoutSet().getAssistanceKg() > 0) {
-            parts.add(format(loggedSet.getWorkoutSet().getAssistanceKg()) + " kg assisted");
+        if (workoutSet.getAssistanceKg() > 0) {
+            parts.add(format(workoutSet.getAssistanceKg()) + " kg assisted");
         }
         if (parts.isEmpty()) {
             parts.add("Completed");
         }
-        parts.add(pretty(loggedSet.getWorkoutSet().getSetType().name()));
+        if (workoutSet.getSetType() != null) {
+            parts.add(pretty(workoutSet.getSetType().name()));
+        }
         return String.join(" • ", parts);
+    }
+
+    private String workoutTitle() {
+        String title = binding.workoutTitleInput.getText().toString().trim();
+        return title.isEmpty() ? "Workout" : title;
+    }
+
+    private String workoutNotes() {
+        return binding.workoutNotesInput.getText().toString().trim();
     }
 
     private SetType selectedSetType(ItemSetEditorBinding editorBinding) {

@@ -32,7 +32,11 @@
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.lalit.levelforge.ui.profile.ProfileFragment"
-        android:label="@string/profile_title" />
+        android:label="@string/profile_title">
+        <action
+            android:id="@+id/action_profileFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/statsFragment"
@@ -57,5 +61,10 @@
         android:id="@+id/workoutLoggerFragment"
         android:name="com.lalit.levelforge.ui.workout.WorkoutLoggerFragment"
         android:label="@string/workout_logger_title" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.lalit.levelforge.ui.settings.SettingsFragment"
+        android:label="@string/settings_title" />
 
 </navigation>

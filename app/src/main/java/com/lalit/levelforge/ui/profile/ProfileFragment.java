@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.lalit.levelforge.R;
 import com.lalit.levelforge.data.local.entity.Exercise;
@@ -59,6 +60,8 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
+        binding.settingsButton.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_profileFragment_to_settingsFragment));
         viewModel.getCompletedSessions().observe(getViewLifecycleOwner(), this::renderWorkouts);
         viewModel.getLevelState().observe(getViewLifecycleOwner(), levelState -> {
             latestLevelState = levelState;
@@ -99,6 +102,10 @@ public class ProfileFragment extends Fragment {
                     dateFormat.format(new Date(session.getCompletedAt())),
                     formatDuration(session.getDurationSeconds())
             ));
+            String notes = session.getNotes();
+            boolean hasNotes = notes != null && !notes.trim().isEmpty();
+            itemBinding.workoutNotes.setVisibility(hasNotes ? View.VISIBLE : View.GONE);
+            itemBinding.workoutNotes.setText(hasNotes ? notes.trim() : "");
             itemBinding.workoutExp.setText(getString(R.string.profile_workout_exp, session.getTotalExp()));
             itemBinding.getRoot().setOnClickListener(v -> {
                 if (selectedSessionId == session.getId()) {

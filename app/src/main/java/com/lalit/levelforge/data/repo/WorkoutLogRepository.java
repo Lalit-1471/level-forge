@@ -62,12 +62,13 @@ public class WorkoutLogRepository {
         this.levelStateDao = levelStateDao;
     }
 
-    public void saveCompletedWorkout(String title, List<WorkoutSet> sets, int totalExp,
+    public void saveCompletedWorkout(String title, String notes, List<WorkoutSet> sets, int totalExp,
                                      int durationSeconds, SaveCallback callback) {
         diskExecutor.execute(() -> {
             long now = System.currentTimeMillis();
             WorkoutSession session = new WorkoutSession();
             session.setTitle(title);
+            session.setNotes(notes == null ? "" : notes.trim());
             session.setStartedAt(now - (Math.max(0, durationSeconds) * 1000L));
             session.setCompletedAt(now);
             session.setCreatedAt(now);

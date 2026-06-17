@@ -36,6 +36,15 @@
                 android:layout_marginTop="6dp"
                 android:textColor="@color/slate_200"
                 android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/workoutNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/slate_300"
+                android:textSize="13sp"
+                android:visibility="gone" />
         </LinearLayout>
 
         <TextView

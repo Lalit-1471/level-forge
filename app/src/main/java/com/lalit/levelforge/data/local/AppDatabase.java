@@ -13,6 +13,7 @@ import com.lalit.levelforge.data.local.dao.QuestDefinitionDao;
 import com.lalit.levelforge.data.local.dao.QuestObjectiveDao;
 import com.lalit.levelforge.data.local.dao.QuestObjectiveProgressDao;
 import com.lalit.levelforge.data.local.dao.QuestProgressDao;
+import com.lalit.levelforge.data.local.dao.RoutineDao;
 import com.lalit.levelforge.data.local.dao.StreakStateDao;
 import com.lalit.levelforge.data.local.dao.UserProfileDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSessionDao;
@@ -25,6 +26,9 @@ import com.lalit.levelforge.data.local.entity.QuestDefinition;
 import com.lalit.levelforge.data.local.entity.QuestObjective;
 import com.lalit.levelforge.data.local.entity.QuestObjectiveProgress;
 import com.lalit.levelforge.data.local.entity.QuestProgress;
+import com.lalit.levelforge.data.local.entity.Routine;
+import com.lalit.levelforge.data.local.entity.RoutineExercise;
+import com.lalit.levelforge.data.local.entity.RoutineSet;
 import com.lalit.levelforge.data.local.entity.StreakState;
 import com.lalit.levelforge.data.local.entity.UserProfile;
 import com.lalit.levelforge.data.local.entity.WorkoutSession;
@@ -43,9 +47,12 @@ import com.lalit.levelforge.data.local.entity.WorkoutSet;
                 QuestProgress.class,
                 StreakState.class,
                 LevelState.class,
-                UserProfile.class
+                UserProfile.class,
+                Routine.class,
+                RoutineExercise.class,
+                RoutineSet.class
         },
-        version = 6,
+        version = 7,
         exportSchema = true
 )
 @TypeConverters(RoomConverters.class)
@@ -73,4 +80,6 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract LevelStateDao levelStateDao();
 
     public abstract UserProfileDao userProfileDao();
+
+    public abstract RoutineDao routineDao();
 }

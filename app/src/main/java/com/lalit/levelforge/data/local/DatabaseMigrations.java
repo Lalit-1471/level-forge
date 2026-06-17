@@ -62,4 +62,40 @@ public final class DatabaseMigrations {
                     + "ON `quest_objective_progress` (`periodStartMillis`)");
         }
     };
+
+    public static final Migration MIGRATION_6_7 = new Migration(6, 7) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS `routines` ("
+                    + "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + "`title` TEXT, "
+                    + "`notes` TEXT, "
+                    + "`createdAt` INTEGER NOT NULL, "
+                    + "`updatedAt` INTEGER NOT NULL)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS `routine_exercises` ("
+                    + "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + "`routineId` INTEGER NOT NULL, "
+                    + "`exerciseId` INTEGER NOT NULL, "
+                    + "`sortOrder` INTEGER NOT NULL, "
+                    + "FOREIGN KEY(`routineId`) REFERENCES `routines`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE, "
+                    + "FOREIGN KEY(`exerciseId`) REFERENCES `exercises`(`id`) ON UPDATE NO ACTION ON DELETE RESTRICT)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_routine_exercises_routineId` "
+                    + "ON `routine_exercises` (`routineId`)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_routine_exercises_exerciseId` "
+                    + "ON `routine_exercises` (`exerciseId`)");
+            db.execSQL("CREATE TABLE IF NOT EXISTS `routine_sets` ("
+                    + "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
+                    + "`routineExerciseId` INTEGER NOT NULL, "
+                    + "`setNumber` INTEGER NOT NULL, "
+                    + "`setType` TEXT, "
+                    + "`reps` INTEGER NOT NULL, "
+                    + "`weightKg` REAL NOT NULL, "
+                    + "`durationSeconds` INTEGER NOT NULL, "
+                    + "`distanceMeters` REAL NOT NULL, "
+                    + "`assistanceKg` REAL NOT NULL, "
+                    + "FOREIGN KEY(`routineExerciseId`) REFERENCES `routine_exercises`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_routine_sets_routineExerciseId` "
+                    + "ON `routine_sets` (`routineExerciseId`)");
+        }
+    };
 }

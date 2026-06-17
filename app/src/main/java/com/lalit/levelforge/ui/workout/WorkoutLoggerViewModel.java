@@ -5,10 +5,12 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.lalit.levelforge.data.local.entity.Exercise;
+import com.lalit.levelforge.data.local.entity.Routine;
 import com.lalit.levelforge.data.local.entity.WorkoutSet;
 import com.lalit.levelforge.data.model.ExerciseType;
 import com.lalit.levelforge.data.model.SetType;
 import com.lalit.levelforge.data.repo.ExerciseRepository;
+import com.lalit.levelforge.data.repo.RoutineRepository;
 import com.lalit.levelforge.data.repo.WorkoutLogRepository;
 import com.lalit.levelforge.domain.progression.ExpBreakdown;
 import com.lalit.levelforge.domain.progression.ExpCalculator;
@@ -27,28 +29,39 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 public class WorkoutLoggerViewModel extends ViewModel {
 
     private final WorkoutLogRepository workoutLogRepository;
+    private final RoutineRepository routineRepository;
     private final LiveData<List<Exercise>> exercises;
+    private final LiveData<List<Routine>> routines;
     private final MutableLiveData<List<LoggedExercise>> loggedExercises = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<Integer> totalExp = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> reviewMode = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> saved = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> routineSaved = new MutableLiveData<>(false);
     private final MutableLiveData<String> hiddenQuest = new MutableLiveData<>();
     private final Map<Long, Double> historicalBestEffortByExercise = new HashMap<>();
     private final Map<Long, Double> historicalBestWeightByExercise = new HashMap<>();
     private final Map<Long, Double> historicalBestVolumeByExercise = new HashMap<>();
     private final Map<Long, Integer> historicalBestRepsByExercise = new HashMap<>();
+    private final Map<Long, List<WorkoutSet>> previousSetsByExercise = new HashMap<>();
     private final long startedAtMillis = System.currentTimeMillis();
 
     @Inject
     public WorkoutLoggerViewModel(ExerciseRepository exerciseRepository,
-                                  WorkoutLogRepository workoutLogRepository) {
+                                  WorkoutLogRepository workoutLogRepository,
+                                  RoutineRepository routineRepository) {
         this.workoutLogRepository = workoutLogRepository;
+        this.routineRepository = routineRepository;
         exerciseRepository.seedDefaultExercises();
         exercises = exerciseRepository.observeExercises();
+        routines = routineRepository.observeRoutines();
     }
 
     public LiveData<List<Exercise>> getExercises() {
         return exercises;
+    }
+
+    public LiveData<List<Routine>> getRoutines() {
+        return routines;
     }
 
     public LiveData<List<LoggedExercise>> getLoggedExercises() {
@@ -61,6 +74,10 @@ public class WorkoutLoggerViewModel extends ViewModel {
 
     public LiveData<Boolean> getSaved() {
         return saved;
+    }
+
+    public LiveData<Boolean> getRoutineSaved() {
+        return routineSaved;
     }
 
     public LiveData<Boolean> getReviewMode() {
@@ -177,25 +194,47 @@ public class WorkoutLoggerViewModel extends ViewModel {
         }
     }
 
-    public void postWorkout(String title, int durationSeconds) {
-        List<LoggedExercise> currentExercises = safeLoggedExercises();
-        List<WorkoutSet> sets = new ArrayList<>();
-        for (LoggedExercise loggedExercise : currentExercises) {
-            for (LoggedSet loggedSet : loggedExercise.getSets()) {
-                sets.add(loggedSet.getWorkoutSet());
+    public void startRoutine(long routineId) {
+        routineRepository.loadRoutine(routineId, templates -> {
+            List<LoggedExercise> loadedExercises = new ArrayList<>();
+            for (RoutineRepository.RoutineExerciseTemplate template : templates) {
+                Exercise exercise = template.getExercise();
+                loadHistoricalBestEffort(exercise);
+                loadedExercises.add(new LoggedExercise(
+                        exercise,
+                        rebuildLoggedSets(exercise, template.getSets())
+                ));
             }
-        }
+            loggedExercises.setValue(Collections.unmodifiableList(loadedExercises));
+            totalExp.setValue(sumExp(loadedExercises));
+            reviewMode.setValue(false);
+            hiddenQuest.setValue(null);
+            evaluateHiddenQuest(loadedExercises);
+        });
+    }
+
+    public void postWorkout(String title, String notes, int durationSeconds) {
+        List<LoggedExercise> currentExercises = safeLoggedExercises();
+        List<WorkoutSet> sets = collectWorkoutSets(currentExercises);
         if (sets.isEmpty()) {
             return;
         }
 
         int exp = sumExp(currentExercises);
-        workoutLogRepository.saveCompletedWorkout(title, sets, exp, durationSeconds, (sessionId, sessionExp) -> {
+        workoutLogRepository.saveCompletedWorkout(cleanTitle(title), notes, sets, exp, durationSeconds, (sessionId, sessionExp) -> {
             loggedExercises.setValue(Collections.emptyList());
             totalExp.setValue(0);
             reviewMode.setValue(false);
             saved.setValue(true);
         });
+    }
+
+    public void saveCurrentAsRoutine(String title, String notes) {
+        List<WorkoutSet> sets = collectWorkoutSets(safeLoggedExercises());
+        if (sets.isEmpty()) {
+            return;
+        }
+        routineRepository.saveRoutine(cleanTitle(title), notes, sets, routineId -> routineSaved.setValue(true));
     }
 
     public void discardWorkout() {
@@ -209,10 +248,26 @@ public class WorkoutLoggerViewModel extends ViewModel {
         saved.setValue(false);
     }
 
+    public void consumeRoutineSaved() {
+        routineSaved.setValue(false);
+    }
+
+    public WorkoutSet getPreviousSet(long exerciseId, int setIndex) {
+        List<WorkoutSet> previousSets = previousSetsByExercise.get(exerciseId);
+        if (previousSets == null || setIndex < 0 || setIndex >= previousSets.size()) {
+            return null;
+        }
+        return previousSets.get(setIndex);
+    }
+
     public int setCount() {
         int count = 0;
         for (LoggedExercise loggedExercise : safeLoggedExercises()) {
-            count += loggedExercise.getSets().size();
+            for (LoggedSet loggedSet : loggedExercise.getSets()) {
+                if (loggedSet.getWorkoutSet().isCompleted()) {
+                    count++;
+                }
+            }
         }
         return count;
     }
@@ -229,6 +284,18 @@ public class WorkoutLoggerViewModel extends ViewModel {
     private List<LoggedExercise> safeLoggedExercises() {
         List<LoggedExercise> value = loggedExercises.getValue();
         return value == null ? Collections.emptyList() : value;
+    }
+
+    private List<WorkoutSet> collectWorkoutSets(List<LoggedExercise> currentExercises) {
+        List<WorkoutSet> sets = new ArrayList<>();
+        for (LoggedExercise loggedExercise : currentExercises) {
+            for (LoggedSet loggedSet : loggedExercise.getSets()) {
+                if (loggedSet.getWorkoutSet().isCompleted()) {
+                    sets.add(loggedSet.getWorkoutSet());
+                }
+            }
+        }
+        return sets;
     }
 
     private WorkoutSet buildWorkoutSet(long exerciseId, int setNumber, SetType setType, int reps, double weightKg,
@@ -260,6 +327,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
                     source.getDistanceMeters(),
                     source.getAssistanceKg()
             ));
+            copied.get(copied.size() - 1).setCompleted(source.isCompleted());
         }
         return copied;
     }
@@ -330,6 +398,7 @@ public class WorkoutLoggerViewModel extends ViewModel {
                 bestVolume = Math.max(bestVolume, setVolume(workoutSet));
                 bestReps = Math.max(bestReps, workoutSet.getReps());
             }
+            previousSetsByExercise.put(exerciseId, latestSessionSets(sets));
             historicalBestEffortByExercise.put(exerciseId, bestScore);
             historicalBestWeightByExercise.put(exerciseId, bestWeight);
             historicalBestVolumeByExercise.put(exerciseId, bestVolume);
@@ -339,6 +408,21 @@ public class WorkoutLoggerViewModel extends ViewModel {
             totalExp.setValue(sumExp(rebuiltExercises));
             evaluateHiddenQuest(rebuiltExercises);
         });
+    }
+
+    private List<WorkoutSet> latestSessionSets(List<WorkoutSet> sets) {
+        if (sets == null || sets.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<WorkoutSet> latestSets = new ArrayList<>();
+        long sessionId = sets.get(0).getSessionId();
+        for (WorkoutSet workoutSet : sets) {
+            if (workoutSet.getSessionId() != sessionId) {
+                break;
+            }
+            latestSets.add(workoutSet);
+        }
+        return latestSets;
     }
 
     private void evaluateHiddenQuest(List<LoggedExercise> exercises) {
@@ -424,9 +508,18 @@ public class WorkoutLoggerViewModel extends ViewModel {
         int sum = 0;
         for (LoggedExercise loggedExercise : exercises) {
             for (LoggedSet set : loggedExercise.getSets()) {
-                sum += set.getExp();
+                if (set.getWorkoutSet().isCompleted()) {
+                    sum += set.getExp();
+                }
             }
         }
         return sum;
+    }
+
+    private String cleanTitle(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            return "Workout";
+        }
+        return title.trim();
     }
 }

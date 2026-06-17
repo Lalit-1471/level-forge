@@ -14,6 +14,7 @@ import com.lalit.levelforge.data.local.dao.QuestDefinitionDao;
 import com.lalit.levelforge.data.local.dao.QuestObjectiveDao;
 import com.lalit.levelforge.data.local.dao.QuestObjectiveProgressDao;
 import com.lalit.levelforge.data.local.dao.QuestProgressDao;
+import com.lalit.levelforge.data.local.dao.RoutineDao;
 import com.lalit.levelforge.data.local.dao.StreakStateDao;
 import com.lalit.levelforge.data.local.dao.UserProfileDao;
 import com.lalit.levelforge.data.local.dao.WorkoutSessionDao;
@@ -40,7 +41,8 @@ public final class AppModule {
         return Room.databaseBuilder(context, AppDatabase.class, "levelforge.db")
                 .addMigrations(DatabaseMigrations.MIGRATION_3_4,
                         DatabaseMigrations.MIGRATION_4_5,
-                        DatabaseMigrations.MIGRATION_5_6)
+                        DatabaseMigrations.MIGRATION_5_6,
+                        DatabaseMigrations.MIGRATION_6_7)
                 .fallbackToDestructiveMigration()
                 .build();
     }
@@ -103,5 +105,10 @@ public final class AppModule {
     @Provides
     static UserProfileDao provideUserProfileDao(AppDatabase appDatabase) {
         return appDatabase.userProfileDao();
+    }
+
+    @Provides
+    static RoutineDao provideRoutineDao(AppDatabase appDatabase) {
+        return appDatabase.routineDao();
     }
 }

@@ -26,7 +26,7 @@ public interface WorkoutSetDao {
     @Query("SELECT workout_sets.* FROM workout_sets INNER JOIN workout_sessions ON workout_sets.sessionId = workout_sessions.id WHERE workout_sessions.completed = 1 ORDER BY workout_sessions.completedAt ASC, workout_sets.exerciseId, workout_sets.setNumber")
     LiveData<List<WorkoutSetWithExercise>> observeCompletedSetDetails();
 
-    @Query("SELECT * FROM workout_sets WHERE exerciseId = :exerciseId AND completed = 1")
+    @Query("SELECT workout_sets.* FROM workout_sets INNER JOIN workout_sessions ON workout_sets.sessionId = workout_sessions.id WHERE workout_sets.exerciseId = :exerciseId AND workout_sets.completed = 1 AND workout_sessions.completed = 1 ORDER BY workout_sessions.completedAt DESC, workout_sets.setNumber ASC")
     List<WorkoutSet> getCompletedSetsForExercise(long exerciseId);
 
     @Insert
