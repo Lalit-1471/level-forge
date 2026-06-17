@@ -61,7 +61,9 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
         binding.settingsButton.setOnClickListener(v ->
-                Navigation.findNavController(v).navigate(R.id.action_profileFragment_to_settingsFragment));
+                Navigation.findNavController(v).navigate(R.id.settingsFragment));
+        binding.routinesButton.setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_profileFragment_to_routinesFragment));
         viewModel.getCompletedSessions().observe(getViewLifecycleOwner(), this::renderWorkouts);
         viewModel.getLevelState().observe(getViewLifecycleOwner(), levelState -> {
             latestLevelState = levelState;

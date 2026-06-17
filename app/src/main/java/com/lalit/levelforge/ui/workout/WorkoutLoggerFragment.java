@@ -31,6 +31,7 @@ import com.lalit.levelforge.databinding.ItemExercisePickerBinding;
 import com.lalit.levelforge.databinding.ItemLoggedSetBinding;
 import com.lalit.levelforge.databinding.ItemSetEditorBinding;
 import com.lalit.levelforge.databinding.ItemWorkoutExerciseBinding;
+import com.lalit.levelforge.ui.routine.RoutinesFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,8 @@ public class WorkoutLoggerFragment extends Fragment {
     private int editingSetIndex = -1;
     private int lastTotalExp;
     private String exerciseSearchQuery = "";
+    private boolean routineBuilderMode;
+    private boolean initialRoutineLoaded;
 
     private final Runnable timerRunnable = new Runnable() {
         @Override
@@ -73,6 +76,9 @@ public class WorkoutLoggerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(WorkoutLoggerViewModel.class);
+        routineBuilderMode = getArguments() != null
+                && getArguments().getBoolean(RoutinesFragment.ARG_ROUTINE_BUILDER, false);
+        configureModeChrome();
         setupMuscleFilters();
         timerHandler.post(timerRunnable);
 
@@ -95,7 +101,9 @@ public class WorkoutLoggerFragment extends Fragment {
             }
         });
         viewModel.getHiddenQuest().observe(getViewLifecycleOwner(), hiddenQuest -> {
-            boolean showHiddenQuest = hiddenQuest != null && !hiddenQuest.trim().isEmpty();
+            boolean showHiddenQuest = !routineBuilderMode
+                    && hiddenQuest != null
+                    && !hiddenQuest.trim().isEmpty();
             binding.hiddenQuestCard.setVisibility(showHiddenQuest ? View.VISIBLE : View.GONE);
             binding.hiddenQuestText.setText(showHiddenQuest ? hiddenQuest : "");
         });
@@ -110,6 +118,9 @@ public class WorkoutLoggerFragment extends Fragment {
             if (saved != null && saved) {
                 Toast.makeText(requireContext(), R.string.workout_routine_saved, Toast.LENGTH_SHORT).show();
                 viewModel.consumeRoutineSaved();
+                if (routineBuilderMode) {
+                    Navigation.findNavController(requireView()).popBackStack();
+                }
             }
         });
 
@@ -150,6 +161,35 @@ public class WorkoutLoggerFragment extends Fragment {
             viewModel.discardWorkout();
             Navigation.findNavController(v).popBackStack();
         });
+        loadInitialRoutineIfRequested();
+    }
+
+    private void configureModeChrome() {
+        if (!routineBuilderMode) {
+            return;
+        }
+        binding.workoutTitle.setText(R.string.routine_builder_title);
+        binding.workoutSubtitle.setText(R.string.routine_builder_subtitle);
+        binding.timerValue.setVisibility(View.GONE);
+        binding.workoutStatsRow.setVisibility(View.GONE);
+        binding.hiddenQuestCard.setVisibility(View.GONE);
+        binding.finishWorkoutButton.setText(R.string.routine_builder_finish);
+        binding.reviewTitle.setText(R.string.routine_builder_review_title);
+        binding.postWorkoutButton.setVisibility(View.GONE);
+        binding.saveRoutineButton.setText(R.string.routines_create);
+        binding.discardWorkoutButton.setText(R.string.workout_cancel);
+        binding.discardWorkoutButtonInline.setText(R.string.workout_cancel);
+    }
+
+    private void loadInitialRoutineIfRequested() {
+        if (initialRoutineLoaded || getArguments() == null) {
+            return;
+        }
+        long routineId = getArguments().getLong(RoutinesFragment.ARG_ROUTINE_ID, -1L);
+        if (routineId > 0) {
+            initialRoutineLoaded = true;
+            viewModel.startRoutine(routineId);
+        }
     }
 
     private void setupMuscleFilters() {
@@ -413,7 +453,7 @@ public class WorkoutLoggerFragment extends Fragment {
         renderReviewExercises();
         updateReviewSummary();
         if (binding.workoutTitleInput.getText().toString().trim().isEmpty()) {
-            binding.workoutTitleInput.setText("Workout");
+            binding.workoutTitleInput.setText(routineBuilderMode ? "New routine" : "Workout");
         }
         binding.workoutContent.setVisibility(View.GONE);
         binding.pickerContent.setVisibility(View.GONE);

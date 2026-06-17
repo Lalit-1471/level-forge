@@ -36,6 +36,9 @@
         <action
             android:id="@+id/action_profileFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_routinesFragment"
+            app:destination="@id/routinesFragment" />
     </fragment>
 
     <fragment
@@ -66,5 +69,14 @@
         android:id="@+id/settingsFragment"
         android:name="com.lalit.levelforge.ui.settings.SettingsFragment"
         android:label="@string/settings_title" />
+
+    <fragment
+        android:id="@+id/routinesFragment"
+        android:name="com.lalit.levelforge.ui.routine.RoutinesFragment"
+        android:label="@string/routines_title">
+        <action
+            android:id="@+id/action_routinesFragment_to_workoutLoggerFragment"
+            app:destination="@id/workoutLoggerFragment" />
+    </fragment>
 
 </navigation>

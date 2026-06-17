@@ -100,6 +100,7 @@
     <string name="profile_title">Profile</string>
     <string name="profile_subtitle">Posted workouts and earned training EXP.</string>
     <string name="profile_open_settings">Open settings</string>
+    <string name="profile_open_routines">View routines</string>
     <string name="profile_summary_label">Training archive</string>
     <string name="profile_summary_value">%1$d workouts • %2$d EXP earned</string>
     <string name="profile_logged_workouts">Logged workouts</string>
@@ -182,6 +183,19 @@
     <string name="dashboard_quest_ready">Claim reward: %1$s (+%2$d EXP)</string>
     <string name="dashboard_quest_progress">%1$s • %2$d/%3$d</string>
     <string name="dashboard_quest_complete">Daily gates cleared. New quests arrive tomorrow.</string>
+    <string name="routines_title">Routines</string>
+    <string name="routines_subtitle">Build reusable workout plans, then start them with the target sets already loaded.</string>
+    <string name="routines_back">Back</string>
+    <string name="routines_create">+ Create routine</string>
+    <string name="routines_start">Start</string>
+    <string name="routines_default_title">Saved routine</string>
+    <string name="routines_updated_meta">Updated %1$s</string>
+    <string name="routines_empty_title">No routines yet</string>
+    <string name="routines_empty_subtitle">Create a plan once, then start it whenever that training day comes around.</string>
+    <string name="routine_builder_title">Routine Builder</string>
+    <string name="routine_builder_subtitle">Add exercises and target sets, then save this as a reusable plan.</string>
+    <string name="routine_builder_review_title">Routine review</string>
+    <string name="routine_builder_finish">Review routine</string>
     <string name="settings_title">Settings</string>
     <string name="settings_subtitle">Training preferences and local app controls.</string>
     <string name="settings_back">Back</string>
